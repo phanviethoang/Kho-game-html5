@@ -4,55 +4,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Match - Lật thẻ tìm cặp</title>
+
+    <title>G001 - Memory Match</title>
+
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
+            color: #263445;
+        }
+
+        .game-container {
+            width: min(100% - 24px, 650px);
+            margin: 25px auto;
+            padding: 24px;
+            background: white;
+            border-radius: 22px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+            text-align: center;
+        }
+
+        .game-title {
+            margin: 0 0 8px;
+            color: #2563eb;
+            font-size: 30px;
+        }
+
+        .game-description {
+            color: #64748b;
+            margin-bottom: 22px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .stat-box {
+            padding: 13px 5px;
+            background: #eff6ff;
+            border-radius: 14px;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 23px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 460px;
+            margin: 0 auto 20px;
+        }
+
+        .card {
+            aspect-ratio: 1 / 1;
+            min-width: 0;
+            cursor: pointer;
+            perspective: 800px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.45s;
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner,
+        .card.matched .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            font-size: clamp(25px, 6vw, 42px);
+            font-weight: bold;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .card-front {
+            background: linear-gradient(145deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 4px 8px rgba(37,99,235,0.2);
+        }
+
+        .card-front::after {
+            content: "?";
+        }
+
+        .card-back {
+            background: #fef3c7;
+            transform: rotateY(180deg);
+            border: 3px solid #fbbf24;
+        }
+
+        .card.matched .card-back {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+
+        .card:not(.flipped):not(.matched):hover .card-inner {
+            transform: scale(1.04);
+        }
+
+        .game-message {
+            min-height: 28px;
+            margin: 12px 0;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .game-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .game-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .game-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        #restartBtn {
+            background: #2563eb;
+            color: white;
+        }
+
+        #soundBtn {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        #resultModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(15,23,42,0.65);
+        }
+
+        .result-content {
+            width: min(100%, 420px);
+            padding: 28px;
+            border-radius: 22px;
+            background: white;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .result-content h2 {
+            color: #16a34a;
+            margin-top: 0;
+        }
+
+        #finalResult {
+            line-height: 1.8;
+        }
+
+        #playAgainBtn {
+            background: #16a34a;
+            color: white;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                margin: 12px auto;
+                padding: 16px 12px;
+            }
+
+            .game-title {
+                font-size: 24px;
+            }
+
+            .game-board {
+                gap: 8px;
+            }
+
+            .card-front,
+            .card-back {
+                border-radius: 10px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
+
 <body>
+
     <main class="game-container">
-        <header class="game-header">
-            <div class="logo">🧠</div>
-            <h1>THỬ THÁCH TRÍ NHỚ</h1>
-            <p>Quan sát, ghi nhớ và tìm những cặp hình giống nhau!</p>
-        </header>
 
-        <section class="game-info">
-            <div class="info-box">
-                <span>⭐ Điểm số</span>
-                <strong id="score">0</strong>
+        <h1 class="game-title">
+            🧠 MEMORY MATCH
+        </h1>
+
+        <p class="game-description">
+            Lật thẻ và tìm những cặp hình giống nhau!
+        </p>
+
+        <!-- BẢNG THÔNG TIN -->
+        <section class="stats">
+
+            <div class="stat-box">
+                <span class="stat-label">⭐ Điểm số</span>
+                <span class="stat-value" id="score">0</span>
             </div>
-            <div class="info-box">
-                <span>🔄 Lượt lật</span>
-                <strong id="moves">0</strong>
+
+            <div class="stat-box">
+                <span class="stat-label">🔄 Lượt chơi</span>
+                <span class="stat-value" id="moves">0</span>
             </div>
-            <div class="info-box">
-                <span>⏱️ Thời gian</span>
-                <strong id="timer">00:00</strong>
+
+            <div class="stat-box">
+                <span class="stat-label">⏱️ Thời gian</span>
+                <span class="stat-value" id="timer">00:00</span>
             </div>
+
         </section>
 
-        <section class="game-board" id="gameBoard">
-            <!-- Các thẻ bài được tạo bằng JavaScript -->
+        <!-- BÀN CHƠI -->
+        <section
+            id="gameBoard"
+            class="game-board"
+            aria-label="Bàn chơi lật thẻ"
+        >
         </section>
 
+        <!-- THÔNG BÁO -->
+        <div id="message" class="game-message">
+            Hãy tìm các cặp hình giống nhau!
+        </div>
+
+        <!-- CÁC NÚT ĐIỀU KHIỂN -->
         <div class="game-actions">
-            <button id="restartBtn">🔄 Chơi lại</button>
+
+            <button
+                id="soundBtn"
+                class="game-btn"
+                type="button"
+            >
+                🔊 Âm thanh: BẬT
+            </button>
+
+            <button
+                id="restartBtn"
+                class="game-btn"
+                type="button"
+            >
+                🔄 Chơi lại
+            </button>
+
         </div>
 
-        <div id="message" class="message" role="status">
-            Hãy tìm đủ 8 cặp hình giống nhau nhé!
-        </div>
     </main>
 
-    <div id="resultModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="trophy">🏆</div>
-            <h2>CHÚC MỪNG!</h2>
-            <p>Bạn đã hoàn thành thử thách!</p>
+    <!-- HỘP THÔNG BÁO KẾT QUẢ -->
+    <div id="resultModal">
+
+        <div class="result-content">
+
+            <h2>🎉 Chúc mừng!</h2>
+
             <div id="finalResult"></div>
-            <button id="playAgainBtn">Chơi lại</button>
+
+            <button
+                id="playAgainBtn"
+                class="game-btn"
+                type="button"
+            >
+                🔄 Chơi lại
+            </button>
+
         </div>
+
     </div>
 
+    <!-- FILE XỬ LÝ GAME -->
     <script src="game.js"></script>
+
 </body>
 </html>
