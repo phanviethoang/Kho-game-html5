@@ -38,12 +38,12 @@ let soundEnabled = true;
 const SOUND_BASE = "../../00_SHARED_ASSETS/sounds/";
 
 const soundFiles = {
-    flip: "flip.ogg",
-    correct: "correct.ogg",
-    wrong: "wrong.ogg",
-    win: "win.ogg",
-    click: "click.ogg",
-    start: "start.ogg"
+    flip: "flip.mp3",
+    correct: "correct.mp3",
+    wrong: "wrong.mp3",
+    win: "win.mp3",
+    click: "click.mp3",
+    start: "start.mp3"
 };
 
 const soundCache = {};
