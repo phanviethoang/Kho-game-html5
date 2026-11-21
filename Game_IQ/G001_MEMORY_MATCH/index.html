@@ -17,14 +17,15 @@
         body {
             margin: 0;
             min-height: 100vh;
+            padding: 16px;
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
             color: #263445;
         }
 
         .game-container {
-            width: min(100% - 24px, 650px);
-            margin: 25px auto;
+            width: min(100%, 650px);
+            margin: 10px auto;
             padding: 24px;
             background: white;
             border-radius: 22px;
@@ -42,6 +43,8 @@
             color: #64748b;
             margin-bottom: 22px;
         }
+
+        /* BẢNG ĐIỂM */
 
         .stats {
             display: grid;
@@ -70,6 +73,8 @@
             color: #2563eb;
         }
 
+        /* BÀN CHƠI */
+
         .game-board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -79,11 +84,14 @@
             margin: 0 auto 20px;
         }
 
+        /* THẺ */
+
         .card {
+            position: relative;
             aspect-ratio: 1 / 1;
             min-width: 0;
             cursor: pointer;
-            perspective: 800px;
+            perspective: 1000px;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -91,14 +99,20 @@
             position: relative;
             width: 100%;
             height: 100%;
-            transition: transform 0.45s;
             transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
+            transition: transform 0.45s ease;
         }
+
+        /* Khi lật thẻ */
 
         .card.flipped .card-inner,
         .card.matched .card-inner {
             transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
         }
+
+        /* Hai mặt thẻ */
 
         .card-front,
         .card-back {
@@ -110,25 +124,40 @@
             border-radius: 15px;
             font-size: clamp(25px, 6vw, 42px);
             font-weight: bold;
+
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
         }
 
+        /* Mặt úp */
+
         .card-front {
             background: linear-gradient(145deg, #3b82f6, #2563eb);
             color: white;
-            box-shadow: 0 4px 8px rgba(37,99,235,0.2);
+
+            transform: rotateY(0deg);
+            -webkit-transform: rotateY(0deg);
+
+            z-index: 2;
         }
 
         .card-front::after {
             content: "?";
         }
 
+        /* Mặt có đáp án */
+
         .card-back {
             background: #fef3c7;
-            transform: rotateY(180deg);
             border: 3px solid #fbbf24;
+
+            transform: rotateY(180deg);
+            -webkit-transform: rotateY(180deg);
+
+            z-index: 1;
         }
+
+        /* Cặp đúng */
 
         .card.matched .card-back {
             background: #dcfce7;
@@ -139,12 +168,16 @@
             transform: scale(1.04);
         }
 
+        /* THÔNG BÁO */
+
         .game-message {
             min-height: 28px;
             margin: 12px 0;
             font-weight: bold;
             color: #475569;
         }
+
+        /* NÚT ĐIỀU KHIỂN */
 
         .game-actions {
             display: flex;
@@ -178,6 +211,8 @@
             background: #e0f2fe;
             color: #075985;
         }
+
+        /* HỘP KẾT QUẢ */
 
         #resultModal {
             display: none;
@@ -214,9 +249,15 @@
             margin-top: 12px;
         }
 
+        /* ĐIỆN THOẠI */
+
         @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
             .game-container {
-                margin: 12px auto;
+                margin: 8px auto;
                 padding: 16px 12px;
             }
 
@@ -253,6 +294,7 @@
         </p>
 
         <!-- BẢNG THÔNG TIN -->
+
         <section class="stats">
 
             <div class="stat-box">
@@ -272,20 +314,22 @@
 
         </section>
 
-        <!-- BÀN CHƠI -->
+        <!-- BÀN CHƠI 16 THẺ -->
+
         <section
             id="gameBoard"
             class="game-board"
             aria-label="Bàn chơi lật thẻ"
-        >
-        </section>
+        ></section>
 
         <!-- THÔNG BÁO -->
+
         <div id="message" class="game-message">
             Hãy tìm các cặp hình giống nhau!
         </div>
 
-        <!-- CÁC NÚT ĐIỀU KHIỂN -->
+        <!-- NÚT ĐIỀU KHIỂN -->
+
         <div class="game-actions">
 
             <button
@@ -308,7 +352,8 @@
 
     </main>
 
-    <!-- HỘP THÔNG BÁO KẾT QUẢ -->
+    <!-- HỘP KẾT QUẢ -->
+
     <div id="resultModal">
 
         <div class="result-content">
@@ -329,7 +374,8 @@
 
     </div>
 
-    <!-- FILE XỬ LÝ GAME -->
+    <!-- GAME JAVASCRIPT -->
+
     <script src="game.js"></script>
 
 </body>
