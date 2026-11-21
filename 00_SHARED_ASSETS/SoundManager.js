@@ -6,7 +6,7 @@
    ========================================== */
 
 const SOUND_LIBRARY = {
-    click: "",        // Âm thanh bấm nút
+    click: "https://sfxmint.com/dl/ready-click-04.mp3",        // Âm thanh bấm nút
     flip: "https://sfxmint.com/dl/paper-fabric-card-flip-06.mp3",         // Âm thanh lật thẻ
     correct: "",      // Trả lời đúng
     wrong: "",        // Trả lời sai
