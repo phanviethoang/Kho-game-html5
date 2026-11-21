@@ -162,7 +162,10 @@ function shuffle(array) {
 // ==========================================
 
 function initGame() {
+    
+function initGame() {
     clearInterval(timerInterval);
+    timerInterval = null;
 
     cards = [];
     flippedCards = [];
@@ -187,17 +190,20 @@ function initGame() {
 
     updateDisplay();
 
+    // Tạo và xáo trộn 16 thẻ ngay khi khởi động
     const gameCards = shuffle([
         ...symbols,
         ...symbols
     ]);
 
+    // Hiển thị ngay bàn chơi
     renderCards(gameCards);
 
     sendToParent("GAME_READY", {
         gameId: GAME_ID
     });
 }
+
 
 
 // ==========================================
