@@ -1,11 +1,16 @@
 
 /* ==========================================
    G001 - MEMORY MATCH
-   Version 3.0
-   Protocol 1.0
-========================================== */
+   Version: 4.0
+   Protocol: 1.0
+   Sound: Shared SoundManager.js
+   ========================================== */
 
+"use strict";
+
+// ==========================================
 // 1. CẤU HÌNH
+// ==========================================
 
 const GAME_ID = "G001";
 const PROTOCOL = "1.0";
@@ -15,90 +20,31 @@ const symbols = [
     "🐼", "🦁", "🐸", "🐵"
 ];
 
+// ==========================================
+// 2. DOM ELEMENTS
+// ==========================================
+
 const board = document.getElementById("gameBoard");
-const scoreDisplay = document.getElementById("score");
-const movesDisplay = document.getElementById("moves");
-const timerDisplay = document.getElementById("timer");
+const scoreElement = document.getElementById("score");
+const movesElement = document.getElementById("moves");
+const timerElement = document.getElementById("timer");
+
 const restartBtn = document.getElementById("restartBtn");
-const messageDisplay = document.getElementById("message");
+const messageElement = document.getElementById("message");
+
 const resultModal = document.getElementById("resultModal");
 const finalResult = document.getElementById("finalResult");
 const playAgainBtn = document.getElementById("playAgainBtn");
 const soundBtn = document.getElementById("soundBtn");
 
-if (!board) {
-    throw new Error("Không tìm thấy gameBoard trong index.html");
-}
+// ==========================================
+// 3. TRẠNG THÁI GAME
+// ==========================================
 
+let firstCard = null;
+let secondCard = null;
 
-// 2. ÂM THANH DÙNG CHUNG
-
-let soundEnabled = true;
-
-const SOUND_BASE = "../../00_SHARED_ASSETS/sounds/";
-
-const soundFiles = {
-   /*{
-  "match": "https://sfxmint.com/dl/cartoon-pop-26.mp3",
-  "combo": "https://sfxmint.com/dl/retro-game-combo-18.mp3",
-  "bonus": "https://sfxmint.com/dl/retro-game-power-up-50.mp3",
-  "slide": "https://sfxmint.com/dl/ui-swipe-41.mp3",
-  "win": "https://sfxmint.com/dl/feedback-level-up-50.mp3",
-  "lose": "https://sfxmint.com/dl/retro-game-game-over-65.mp3",
-  "countdown": "https://sfxmint.com/dl/mechanical-clock-tick-49.mp3",
-  "celebration": "https://sfxmint.com/dl/feedback-celebration-18.mp3"
-}*/
-    flip: "https://sfxmint.com/dl/ui-swipe-41.mp3",
-    correct: "correct.mp3",
-    wrong: "wrong.mp3",
-    win: "win.mp3",
-    click: "click.mp3",
-    start: "start.mp3"
-};
-
-const soundCache = {};
-
-function playSound(name) {
-    if (!soundEnabled) return;
-
-    const file = soundFiles[name];
-    if (!file) return;
-
-    if (!soundCache[name]) {
-        soundCache[name] = new Audio(SOUND_BASE + file);
-    }
-
-    const audio = soundCache[name];
-    audio.currentTime = 0;
-
-    audio.play().catch(() => {});
-}
-
-function soundFlip() {
-    playSound("flip");
-}
-
-function soundMatch() {
-    playSound("correct");
-}
-
-function soundWrong() {
-    playSound("wrong");
-}
-
-function soundWin() {
-    playSound("win");
-}
-
-function soundRestart() {
-    playSound("start");
-}
-
-
-// 3. BIẾN TRẠNG THÁI
-
-let cards = [];
-let flippedCards = [];
+let lockBoard = false;
 
 let matchedPairs = 0;
 let moves = 0;
@@ -106,49 +52,92 @@ let score = 0;
 let seconds = 0;
 
 let timerInterval = null;
+let timerStarted = false;
+let gameFinished = false;
 
-let started = false;
-let locked = false;
-let completed = false;
+let studentId = "";
+let sessionId = "";
 
-let studentId = null;
-let sessionId = null;
+let soundEnabled = true;
 
+// ==========================================
+// 4. ÂM THANH - SỬ DỤNG SOUNDMANAGER
+// ==========================================
 
-// 4. XÁO TRỘN
+function playGameSound(name) {
+    if (!soundEnabled) return;
 
-function shuffle(array) {
-    const result = [...array];
-
-    for (let i = result.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
+    if (
+        typeof SoundManager !== "undefined" &&
+        SoundManager &&
+        typeof SoundManager.play === "function"
+    ) {
+        SoundManager.play(name);
     }
-
-    return result;
 }
 
-
-// 5. GỬI KẾT QUẢ VỀ WEBSITE CHA
-
-function sendToParent(type, payload = {}) {
-    if (window.parent === window) return;
-
-    window.parent.postMessage({
-        type,
-        protocol: PROTOCOL,
-        ...payload
-    }, "*");
+function soundFlip() {
+    playGameSound("flip");
 }
 
+function soundMatch() {
+    playGameSound("correct");
+}
 
-// 6. HIỂN THỊ THẺ
+function soundWrong() {
+    playGameSound("wrong");
+}
 
-function renderCards(gameCards) {
+function soundWin() {
+    playGameSound("win");
+}
+
+function soundRestart() {
+    playGameSound("start");
+}
+
+function soundClick() {
+    playGameSound("click");
+}
+
+// ==========================================
+// 5. KHỞI TẠO GAME
+// ==========================================
+
+function initGame() {
+
+    clearInterval(timerInterval);
+
+    firstCard = null;
+    secondCard = null;
+
+    lockBoard = false;
+
+    matchedPairs = 0;
+    moves = 0;
+    score = 0;
+    seconds = 0;
+
+    timerStarted = false;
+    gameFinished = false;
+
+    updateStats();
+    updateTimer();
+
+    messageElement.textContent = "Hãy tìm các cặp hình giống nhau!";
+
+    resultModal.classList.remove("show");
+
+    // Xáo trộn 16 thẻ
+    const cards = [...symbols, ...symbols];
+    shuffleArray(cards);
+
+    // Xóa bảng cũ
     board.innerHTML = "";
-    cards = [];
 
-    gameCards.forEach((symbol, index) => {
+    // Tạo thẻ
+    cards.forEach((symbol, index) => {
+
         const card = document.createElement("div");
 
         card.className = "card";
@@ -157,7 +146,7 @@ function renderCards(gameCards) {
 
         card.innerHTML = `
             <div class="card-inner">
-                <div class="card-front"></div>
+                <div class="card-front">?</div>
                 <div class="card-back">${symbol}</div>
             </div>
         `;
@@ -167,277 +156,366 @@ function renderCards(gameCards) {
         });
 
         board.appendChild(card);
-        cards.push(card);
+
+    });
+
+    // Báo cho website cha biết game đã sẵn sàng
+    sendToParent({
+        type: "GAME_READY",
+        gameId: GAME_ID,
+        protocol: PROTOCOL
     });
 }
 
+// ==========================================
+// 6. XÁO TRỘN MẢNG
+// ==========================================
 
-// 7. CẬP NHẬT THÔNG TIN
+function shuffleArray(array) {
 
-function updateDisplay() {
-    scoreDisplay.textContent = score;
-    movesDisplay.textContent = moves;
+    for (let i = array.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+
+    }
+
+    return array;
+}
+
+// ==========================================
+// 7. BẮT ĐẦU ĐẾM GIỜ
+// ==========================================
+
+function startTimer() {
+
+    if (timerStarted) return;
+
+    timerStarted = true;
+
+    timerInterval = setInterval(() => {
+
+        seconds++;
+
+        updateTimer();
+
+    }, 1000);
+
+}
+
+// ==========================================
+// 8. CẬP NHẬT THỜI GIAN
+// ==========================================
+
+function updateTimer() {
 
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
 
-    timerDisplay.textContent =
+    timerElement.textContent =
         String(minutes).padStart(2, "0") +
         ":" +
         String(remainingSeconds).padStart(2, "0");
+
 }
 
+// ==========================================
+// 9. CẬP NHẬT ĐIỂM VÀ LƯỢT
+// ==========================================
 
-// 8. ĐẾM THỜI GIAN
+function updateStats() {
 
-function startTimer() {
-    if (timerInterval !== null) return;
+    scoreElement.textContent = score;
+    movesElement.textContent = moves;
 
-    timerInterval = setInterval(() => {
-        if (completed) return;
-
-        seconds++;
-        updateDisplay();
-    }, 1000);
 }
 
-
-// 9. KHỞI TẠO VÁN MỚI
-
-function initGame() {
-    clearInterval(timerInterval);
-    timerInterval = null;
-
-    flippedCards = [];
-
-    matchedPairs = 0;
-    moves = 0;
-    score = 0;
-    seconds = 0;
-
-    started = false;
-    locked = false;
-    completed = false;
-
-    if (resultModal) {
-        resultModal.style.display = "none";
-    }
-
-    messageDisplay.textContent =
-        "Hãy tìm các cặp hình giống nhau!";
-
-    updateDisplay();
-
-    // XÁO TRỘN NGAY LẬP TỨC
-    const newCards = shuffle([
-        ...symbols,
-        ...symbols
-    ]);
-
-    // TẠO 16 THẺ ÚP
-    renderCards(newCards);
-
-    sendToParent("GAME_READY", {
-        gameId: GAME_ID
-    });
-}
-
-
-// 10. BẮT ĐẦU CHƠI KHI BẤM THẺ ĐẦU TIÊN
-
-function startGame() {
-    if (started) return;
-
-    started = true;
-
-    startTimer();
-
-    sendToParent("GAME_START", {
-        gameId: GAME_ID,
-        studentId,
-        sessionId
-    });
-}
-
-
-// 11. LẬT THẺ
+// ==========================================
+// 10. LẬT THẺ
+// ==========================================
 
 function flipCard(card) {
-    if (locked || completed) return;
+
+    if (gameFinished) return;
+    if (lockBoard) return;
     if (card.classList.contains("flipped")) return;
     if (card.classList.contains("matched")) return;
 
-    startGame();
+    // Bắt đầu tính giờ khi học sinh lật thẻ đầu tiên
+    startTimer();
 
     card.classList.add("flipped");
-    flippedCards.push(card);
 
     soundFlip();
 
-    if (flippedCards.length === 2) {
-        moves++;
-        updateDisplay();
-        checkMatch();
+    if (!firstCard) {
+
+        firstCard = card;
+
+        return;
+
     }
+
+    secondCard = card;
+
+    moves++;
+
+    updateStats();
+
+    checkForMatch();
+
 }
 
+// ==========================================
+// 11. KIỂM TRA CẶP
+// ==========================================
 
-// 12. KIỂM TRA CẶP
+function checkForMatch() {
 
-function checkMatch() {
-    const [card1, card2] = flippedCards;
+    const isMatch =
+        firstCard.dataset.symbol === secondCard.dataset.symbol;
 
-    if (
-        card1.dataset.symbol ===
-        card2.dataset.symbol
-    ) {
-        card1.classList.add("matched");
-        card2.classList.add("matched");
+    if (isMatch) {
 
-        matchedPairs++;
-        score = matchedPairs * 100;
-
-        soundMatch();
-
-        flippedCards = [];
-
-        updateDisplay();
-
-        sendToParent("GAME_PROGRESS", {
-            gameId: GAME_ID,
-            score,
-            moves,
-            matchedPairs,
-            totalPairs: symbols.length
-        });
-
-        if (matchedPairs === symbols.length) {
-            finishGame();
-        }
+        disableMatchedCards();
 
     } else {
-        locked = true;
 
-        soundWrong();
+        unflipCards();
 
-        messageDisplay.textContent =
-            "Chưa đúng! Hãy thử lại nhé.";
-
-        setTimeout(() => {
-            card1.classList.remove("flipped");
-            card2.classList.remove("flipped");
-
-            flippedCards = [];
-            locked = false;
-
-            if (!completed) {
-                messageDisplay.textContent =
-                    "Hãy tiếp tục tìm các cặp hình!";
-            }
-        }, 800);
     }
+
 }
 
+// ==========================================
+// 12. GHÉP ĐÚNG
+// ==========================================
 
-// 13. KẾT THÚC
+function disableMatchedCards() {
+
+    firstCard.classList.add("matched");
+    secondCard.classList.add("matched");
+
+    matchedPairs++;
+
+    score += 10;
+
+    soundMatch();
+
+    messageElement.textContent = "Chính xác! Bạn tìm được một cặp.";
+
+    updateStats();
+
+    resetTurn();
+
+    if (matchedPairs === symbols.length) {
+
+        finishGame();
+
+    }
+
+}
+
+// ==========================================
+// 13. GHÉP SAI
+// ==========================================
+
+function unflipCards() {
+
+    lockBoard = true;
+
+    soundWrong();
+
+    messageElement.textContent = "Chưa đúng! Hãy thử lại nhé.";
+
+    setTimeout(() => {
+
+        firstCard.classList.remove("flipped");
+        secondCard.classList.remove("flipped");
+
+        resetTurn();
+
+    }, 900);
+
+}
+
+// ==========================================
+// 14. RESET LƯỢT
+// ==========================================
+
+function resetTurn() {
+
+    firstCard = null;
+    secondCard = null;
+
+    lockBoard = false;
+
+}
+
+// ==========================================
+// 15. KẾT THÚC GAME
+// ==========================================
 
 function finishGame() {
-    completed = true;
+
+    gameFinished = true;
 
     clearInterval(timerInterval);
-    timerInterval = null;
-
-    soundWin();
-
-    messageDisplay.textContent =
-        "Chúc mừng! Bạn đã tìm được tất cả các cặp!";
 
     const accuracy = moves > 0
         ? Math.round((matchedPairs / moves) * 100)
-        : 100;
+        : 0;
+
+    const wrong = moves - matchedPairs;
+
+    const result = {
+        gameId: GAME_ID,
+        protocol: PROTOCOL,
+
+        score: score,
+        totalPairs: symbols.length,
+        correct: matchedPairs,
+        wrong: wrong,
+        moves: moves,
+        duration: seconds,
+        accuracy: accuracy,
+        status: "completed",
+
+        studentId: studentId,
+        sessionId: sessionId
+    };
+
+    soundWin();
 
     finalResult.innerHTML = `
+        <div>🎉 Chúc mừng bạn!</div>
         <p>Điểm số: <strong>${score}</strong></p>
-        <p>Số lượt chơi: <strong>${moves}</strong></p>
-        <p>Số cặp đúng: <strong>${matchedPairs}</strong></p>
-        <p>Số lượt sai: <strong>${moves - matchedPairs}</strong></p>
-        <p>Thời gian: <strong>${timerDisplay.textContent}</strong></p>
+        <p>Số lượt: <strong>${moves}</strong></p>
+        <p>Thời gian: <strong>${timerElement.textContent}</strong></p>
         <p>Độ chính xác: <strong>${accuracy}%</strong></p>
     `;
 
-    resultModal.style.display = "flex";
+    resultModal.classList.add("show");
 
-    sendToParent("GAME_COMPLETED", {
-        gameId: GAME_ID,
-        studentId,
-        sessionId,
-        score,
-        totalPairs: symbols.length,
-        correct: matchedPairs,
-        wrong: moves - matchedPairs,
-        moves,
-        duration: seconds,
-        accuracy,
-        status: "completed"
+    sendToParent({
+        type: "GAME_COMPLETED",
+        ...result
     });
+
 }
 
-
-// 14. CHƠI LẠI
+// ==========================================
+// 16. CHƠI LẠI
+// ==========================================
 
 function restartGame() {
+
     soundRestart();
+
     initGame();
+
 }
 
-restartBtn.addEventListener("click", restartGame);
-playAgainBtn.addEventListener("click", restartGame);
+// ==========================================
+// 17. BẬT / TẮT ÂM THANH
+// ==========================================
 
+function toggleSound() {
 
-// 15. BẬT TẮT ÂM THANH
+    soundEnabled = !soundEnabled;
 
-if (soundBtn) {
-    soundBtn.addEventListener("click", () => {
-        soundEnabled = !soundEnabled;
+    if (soundEnabled) {
 
-        soundBtn.textContent = soundEnabled
-            ? "🔊 Âm thanh: BẬT"
-            : "🔇 Âm thanh: TẮT";
+        soundBtn.textContent = "🔊 Âm thanh: Bật";
 
-        if (soundEnabled) {
-            playSound("click");
+        if (typeof SoundManager !== "undefined") {
+            SoundManager.enable();
         }
-    });
+
+        soundClick();
+
+    } else {
+
+        soundBtn.textContent = "🔇 Âm thanh: Tắt";
+
+        if (typeof SoundManager !== "undefined") {
+            SoundManager.disable();
+        }
+
+    }
+
 }
 
+// ==========================================
+// 18. GỬI DỮ LIỆU VỀ WEBSITE CHA
+// ==========================================
 
-// 16. NHẬN DỮ LIỆU TỪ WEBSITE CHA
+function sendToParent(data) {
 
-window.addEventListener("message", (event) => {
+    if (window.parent !== window) {
+
+        window.parent.postMessage(data, "*");
+
+    }
+
+}
+
+// ==========================================
+// 19. NHẬN LỆNH TỪ WEBSITE CHA
+// ==========================================
+
+window.addEventListener("message", function(event) {
+
     const data = event.data;
 
-    if (!data || data.protocol !== PROTOCOL) return;
+    if (!data || typeof data !== "object") return;
 
     switch (data.type) {
+
+        case "GAME_START":
+
+            studentId = data.studentId || "";
+            sessionId = data.sessionId || "";
+
+            // Không khởi tạo lại game tại đây
+            break;
+
         case "GAME_INIT":
-            studentId = data.studentId || null;
-            sessionId = data.sessionId || null;
+
+            studentId = data.studentId || "";
+            sessionId = data.sessionId || "";
+
             break;
 
         case "GAME_RESTART":
+
             restartGame();
+
             break;
 
-        // GAME_START không khởi tạo lại bàn chơi.
-        // Tránh xáo trộn ngoài ý muốn.
-        case "GAME_START":
-            studentId = data.studentId || studentId;
-            sessionId = data.sessionId || sessionId;
-            break;
     }
+
 });
 
+// ==========================================
+// 20. GẮN SỰ KIỆN NÚT
+// ==========================================
 
-// 17. KHỞI ĐỘNG DUY NHẤT KHI TẢI TRANG
+if (restartBtn) {
+    restartBtn.addEventListener("click", restartGame);
+}
+
+if (playAgainBtn) {
+    playAgainBtn.addEventListener("click", restartGame);
+}
+
+if (soundBtn) {
+    soundBtn.addEventListener("click", toggleSound);
+}
+
+// ==========================================
+// 21. KHỞI CHẠY
+// ==========================================
 
 initGame();
