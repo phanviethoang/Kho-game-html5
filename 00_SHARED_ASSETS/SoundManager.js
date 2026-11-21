@@ -8,7 +8,7 @@
 const SOUND_LIBRARY = {
     click: "https://sfxmint.com/dl/ready-click-04.mp3",        // Âm thanh bấm nút
     flip: "https://sfxmint.com/dl/paper-fabric-card-flip-06.mp3",         // Âm thanh lật thẻ
-    correct: "",      // Trả lời đúng
+    correct: "https://sfxmint.com/dl/ui-chime-93.mp3",      // Trả lời đúng
     wrong: "",        // Trả lời sai
     win: "",          // Chiến thắng
     start: "",        // Bắt đầu trò chơi
