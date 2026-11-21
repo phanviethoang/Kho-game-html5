@@ -29,6 +29,92 @@ let started = false;
 let locked = false;
 let completed = false;
 
+
+// ==========================================
+// HỆ THỐNG ÂM THANH
+// ==========================================
+
+let audioContext = null;
+let soundEnabled = true;
+
+function initAudio() {
+    if (!audioContext) {
+        const AudioContextClass =
+            window.AudioContext || window.webkitAudioContext;
+
+        if (AudioContextClass) {
+            audioContext = new AudioContextClass();
+        }
+    }
+
+    if (audioContext && audioContext.state === "suspended") {
+        audioContext.resume();
+    }
+}
+
+function playTone(frequency, duration = 0.12, type = "sine", volume = 0.12, delay = 0) {
+    if (!soundEnabled) return;
+
+    initAudio();
+    if (!audioContext) return;
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(
+        frequency,
+        audioContext.currentTime + delay
+    );
+
+    gain.gain.setValueAtTime(0.001, audioContext.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(
+        volume,
+        audioContext.currentTime + delay + 0.015
+    );
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioContext.currentTime + delay + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start(audioContext.currentTime + delay);
+    oscillator.stop(audioContext.currentTime + delay + duration + 0.02);
+}
+
+// Tiếng lật thẻ
+function soundFlip() {
+    playTone(520, 0.07, "sine", 0.07);
+}
+
+// Tiếng tìm đúng cặp
+function soundMatch() {
+    playTone(660, 0.12, "sine", 0.12);
+    playTone(880, 0.18, "sine", 0.12, 0.12);
+}
+
+// Tiếng tìm sai cặp
+function soundWrong() {
+    playTone(240, 0.18, "triangle", 0.08);
+}
+
+// Nhạc chiến thắng
+function soundWin() {
+    const notes = [523, 659, 784, 1047, 784, 1047];
+
+    notes.forEach((note, index) => {
+        playTone(note, 0.22, "sine", 0.13, index * 0.16);
+    });
+}
+
+// Tiếng bắt đầu lại
+function soundRestart() {
+    playTone(440, 0.1, "sine", 0.08);
+    playTone(660, 0.12, "sine", 0.08, 0.1);
+}
+
 // Thông tin phiên chơi nhận từ website
 let gameSession = {
     sessionId: null,
