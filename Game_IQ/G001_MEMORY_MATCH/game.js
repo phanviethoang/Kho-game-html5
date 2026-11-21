@@ -38,19 +38,37 @@ let audioContext = null;
 let soundEnabled = true;
 
 function initAudio() {
-    if (!audioContext) {
-        const AudioContextClass =
-            window.AudioContext || window.webkitAudioContext;
+    
+let audioContext = null;
+let soundEnabled = true;
+let audioUnlocked = false;
 
-        if (AudioContextClass) {
-            audioContext = new AudioContextClass();
-        }
+function initAudio() {
+    const AudioContextClass =
+        window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    if (!audioContext) {
+        audioContext = new AudioContextClass();
     }
 
-    if (audioContext && audioContext.state === "suspended") {
+    if (audioContext.state === "suspended") {
         audioContext.resume();
     }
+
+    audioUnlocked = true;
 }
+
+// Kích hoạt âm thanh bằng thao tác đầu tiên của người chơi
+document.addEventListener("pointerdown", function unlockSound() {
+    initAudio();
+
+    if (audioContext && audioContext.state === "running") {
+        document.removeEventListener("pointerdown", unlockSound);
+    }
+});
+
 
 function playTone(frequency, duration = 0.12, type = "sine", volume = 0.12, delay = 0) {
     if (!soundEnabled) return;
