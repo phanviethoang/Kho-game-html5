@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match - Lật thẻ tìm cặp</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="game-container">
+        <header class="game-header">
+            <div class="logo">🧠</div>
+            <h1>THỬ THÁCH TRÍ NHỚ</h1>
+            <p>Quan sát, ghi nhớ và tìm những cặp hình giống nhau!</p>
+        </header>
+
+        <section class="game-info">
+            <div class="info-box">
+                <span>⭐ Điểm số</span>
+                <strong id="score">0</strong>
+            </div>
+            <div class="info-box">
+                <span>🔄 Lượt lật</span>
+                <strong id="moves">0</strong>
+            </div>
+            <div class="info-box">
+                <span>⏱️ Thời gian</span>
+                <strong id="timer">00:00</strong>
+            </div>
+        </section>
+
+        <section class="game-board" id="gameBoard">
+            <!-- Các thẻ bài được tạo bằng JavaScript -->
+        </section>
+
+        <div class="game-actions">
+            <button id="restartBtn">🔄 Chơi lại</button>
+        </div>
+
+        <div id="message" class="message" role="status">
+            Hãy tìm đủ 8 cặp hình giống nhau nhé!
+        </div>
+    </main>
+
+    <div id="resultModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="trophy">🏆</div>
+            <h2>CHÚC MỪNG!</h2>
+            <p>Bạn đã hoàn thành thử thách!</p>
+            <div id="finalResult"></div>
+            <button id="playAgainBtn">Chơi lại</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
