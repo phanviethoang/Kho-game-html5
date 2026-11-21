@@ -1,0 +1,14 @@
+
+{
+  "gameId": "G001",
+  "name": "Memory Match - Lật thẻ tìm cặp",
+  "description": "Trò chơi rèn luyện trí nhớ và tư duy logic.",
+  "version": "1.0.0",
+  "category": "IQ",
+  "grade": [3, 4, 5],
+  "difficulty": "easy",
+  "entry": "index.html",
+  "status": "active",
+  "protocol": "1.0",
+  "author": "Thu vien game hoc tap"
+}
