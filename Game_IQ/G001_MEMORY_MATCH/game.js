@@ -38,7 +38,17 @@ let soundEnabled = true;
 const SOUND_BASE = "../../00_SHARED_ASSETS/sounds/";
 
 const soundFiles = {
-    flip: "flip.mp3",
+   /*{
+  "match": "https://sfxmint.com/dl/cartoon-pop-26.mp3",
+  "combo": "https://sfxmint.com/dl/retro-game-combo-18.mp3",
+  "bonus": "https://sfxmint.com/dl/retro-game-power-up-50.mp3",
+  "slide": "https://sfxmint.com/dl/ui-swipe-41.mp3",
+  "win": "https://sfxmint.com/dl/feedback-level-up-50.mp3",
+  "lose": "https://sfxmint.com/dl/retro-game-game-over-65.mp3",
+  "countdown": "https://sfxmint.com/dl/mechanical-clock-tick-49.mp3",
+  "celebration": "https://sfxmint.com/dl/feedback-celebration-18.mp3"
+}*/
+    flip: "https://sfxmint.com/dl/ui-swipe-41.mp3",
     correct: "correct.mp3",
     wrong: "wrong.mp3",
     win: "win.mp3",
