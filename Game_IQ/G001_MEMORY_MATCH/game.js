@@ -3,325 +3,325 @@
 // G001 - MEMORY MATCH
 // Trò chơi lật thẻ tìm cặp giống nhau
 // Protocol: 1.0
+// Version: 2.0
 // ==========================================
+
+
+// ==========================================
+// 1. CẤU HÌNH GAME
+// ==========================================
+
+const GAME_ID = "G001";
+const PROTOCOL = "1.0";
 
 const symbols = [
     "🐶", "🐱", "🐰", "🦊",
     "🐼", "🦁", "🐸", "🐵"
 ];
 
+
+// ==========================================
+// 2. QUẢN LÝ ÂM THANH DÙNG CHUNG
+// ==========================================
+
+let soundEnabled = true;
+
+const SOUND_BASE =
+    "../../00_SHARED_ASSETS/sounds/";
+
+const soundFiles = {
+    flip: "flip.mp3",
+    correct: "correct.mp3",
+    wrong: "wrong.mp3",
+    win: "win.mp3",
+    click: "click.mp3",
+    collect: "collect.mp3",
+    levelUp: "level-up.mp3",
+    start: "start.mp3",
+    gameOver: "game-over.mp3",
+    notification: "notification.mp3"
+};
+
+const soundCache = {};
+
+function playSound(name) {
+    if (!soundEnabled) return;
+
+    const file = soundFiles[name];
+
+    if (!file) return;
+
+    if (!soundCache[name]) {
+        soundCache[name] = new Audio(SOUND_BASE + file);
+        soundCache[name].preload = "none";
+    }
+
+    const audio = soundCache[name];
+
+    audio.currentTime = 0;
+
+    audio.play().catch(() => {
+        // Bình thường nếu file âm thanh chưa được thêm
+        // hoặc trình duyệt chưa cho phép phát âm thanh.
+    });
+}
+
+// Các hàm âm thanh tương thích với game
+
+function soundFlip() {
+    playSound("flip");
+}
+
+function soundMatch() {
+    playSound("correct");
+}
+
+function soundWrong() {
+    playSound("wrong");
+}
+
+function soundWin() {
+    playSound("win");
+}
+
+function soundRestart() {
+    playSound("start");
+}
+
+
+// ==========================================
+// 3. KHAI BÁO BIẾN GAME
+// ==========================================
+
 const board = document.getElementById("gameBoard");
-const scoreElement = document.getElementById("score");
-const movesElement = document.getElementById("moves");
-const timerElement = document.getElementById("timer");
-const messageElement = document.getElementById("message");
-const modal = document.getElementById("resultModal");
+
+const scoreDisplay = document.getElementById("score");
+const movesDisplay = document.getElementById("moves");
+const timerDisplay = document.getElementById("timer");
+
+const restartBtn = document.getElementById("restartBtn");
+const messageDisplay = document.getElementById("message");
+
+const resultModal = document.getElementById("resultModal");
 const finalResult = document.getElementById("finalResult");
+const playAgainBtn = document.getElementById("playAgainBtn");
+
+const soundBtn = document.getElementById("soundBtn");
 
 let cards = [];
 let flippedCards = [];
+
 let matchedPairs = 0;
 let moves = 0;
 let score = 0;
 let seconds = 0;
+
 let timerInterval = null;
+
 let started = false;
 let locked = false;
 let completed = false;
 
+let studentId = null;
+let sessionId = null;
+
 
 // ==========================================
-// HỆ THỐNG ÂM THANH
+// 4. GỬI DỮ LIỆU VỀ WEBSITE CHA
 // ==========================================
 
-let audioContext = null;
-let soundEnabled = true;
-
-function initAudio() {
-    
-let audioContext = null;
-let soundEnabled = true;
-let audioUnlocked = false;
-
-function initAudio() {
-    const AudioContextClass =
-        window.AudioContext || window.webkitAudioContext;
-
-    if (!AudioContextClass) return;
-
-    if (!audioContext) {
-        audioContext = new AudioContextClass();
-    }
-
-    if (audioContext.state === "suspended") {
-        audioContext.resume();
-    }
-
-    audioUnlocked = true;
-}
-
-// Kích hoạt âm thanh bằng thao tác đầu tiên của người chơi
-document.addEventListener("pointerdown", function unlockSound() {
-    initAudio();
-
-    if (audioContext && audioContext.state === "running") {
-        document.removeEventListener("pointerdown", unlockSound);
-    }
-});
-
-
-function playTone(frequency, duration = 0.12, type = "sine", volume = 0.12, delay = 0) {
-    if (!soundEnabled) return;
-
-    initAudio();
-    if (!audioContext) return;
-
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(
-        frequency,
-        audioContext.currentTime + delay
-    );
-
-    gain.gain.setValueAtTime(0.001, audioContext.currentTime + delay);
-    gain.gain.exponentialRampToValueAtTime(
-        volume,
-        audioContext.currentTime + delay + 0.015
-    );
-    gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioContext.currentTime + delay + duration
-    );
-
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-
-    oscillator.start(audioContext.currentTime + delay);
-    oscillator.stop(audioContext.currentTime + delay + duration + 0.02);
-}
-
-// Tiếng lật thẻ
-function soundFlip() {
-    playTone(520, 0.07, "sine", 0.07);
-}
-
-// Tiếng tìm đúng cặp
-function soundMatch() {
-    playTone(660, 0.12, "sine", 0.12);
-    playTone(880, 0.18, "sine", 0.12, 0.12);
-}
-
-// Tiếng tìm sai cặp
-function soundWrong() {
-    playTone(240, 0.18, "triangle", 0.08);
-}
-
-// Nhạc chiến thắng
-function soundWin() {
-    const notes = [523, 659, 784, 1047, 784, 1047];
-
-    notes.forEach((note, index) => {
-        playTone(note, 0.22, "sine", 0.13, index * 0.16);
-    });
-}
-
-// Tiếng bắt đầu lại
-function soundRestart() {
-    playTone(440, 0.1, "sine", 0.08);
-    playTone(660, 0.12, "sine", 0.08, 0.1);
-}
-
-// Thông tin phiên chơi nhận từ website
-let gameSession = {
-    sessionId: null,
-    studentId: null,
-    gameId: "G001",
-    studentName: "",
-    level: "easy"
-};
-
-// Gửi thông tin về website cha
 function sendToParent(type, payload = {}) {
-    if (window.parent !== window) {
-        window.parent.postMessage({
-            type: type,
-            protocol: "1.0",
-            ...payload
-        }, "*");
-    }
+    window.parent.postMessage({
+        type: type,
+        protocol: PROTOCOL,
+        ...payload
+    }, "*");
 }
 
-// Nhận thông tin khởi tạo từ website
-window.addEventListener("message", function(event) {
-    if (event.source !== window.parent) return;
 
-    const data = event.data;
+// ==========================================
+// 5. XÁO TRỘN THẺ
+// ==========================================
 
-    if (!data || typeof data !== "object") return;
-
-    if (data.type === "GAME_INIT") {
-        gameSession = {
-            ...gameSession,
-            ...(data.payload || {})
-        };
-
-        sendToParent("GAME_READY", {
-            gameId: gameSession.gameId,
-            sessionId: gameSession.sessionId
-        });
-    }
-
-    if (data.type === "GAME_START") {
-        startGame();
-    }
-});
-
-// Xáo trộn thẻ
 function shuffle(array) {
     const result = [...array];
 
     for (let i = result.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
+
+        [result[i], result[j]] =
+            [result[j], result[i]];
     }
 
     return result;
 }
 
-// Khởi tạo trò chơi
+
+// ==========================================
+// 6. KHỞI TẠO GAME
+// ==========================================
+
 function initGame() {
     clearInterval(timerInterval);
 
-    cards = shuffle([...symbols, ...symbols]);
-
+    cards = [];
     flippedCards = [];
+
     matchedPairs = 0;
     moves = 0;
     score = 0;
     seconds = 0;
+
     started = false;
     locked = false;
     completed = false;
 
-    scoreElement.textContent = score;
-    movesElement.textContent = moves;
-    timerElement.textContent = "00:00";
+    if (resultModal) {
+        resultModal.style.display = "none";
+    }
 
-    messageElement.textContent =
-        "Hãy tìm đủ 8 cặp hình giống nhau nhé!";
+    if (messageDisplay) {
+        messageDisplay.textContent =
+            "Hãy tìm các cặp hình giống nhau!";
+    }
 
-    modal.classList.add("hidden");
+    updateDisplay();
 
-    renderCards();
+    const gameCards = shuffle([
+        ...symbols,
+        ...symbols
+    ]);
+
+    renderCards(gameCards);
+
+    sendToParent("GAME_READY", {
+        gameId: GAME_ID
+    });
 }
 
-// Hiển thị các thẻ
-function renderCards() {
+
+// ==========================================
+// 7. HIỂN THỊ THẺ
+// ==========================================
+
+function renderCards(gameCards) {
     board.innerHTML = "";
 
-    cards.forEach((symbol, index) => {
-        const card = document.createElement("button");
+    gameCards.forEach((symbol, index) => {
+        const card = document.createElement("div");
 
         card.className = "card";
-        card.type = "button";
-        card.textContent = "❓";
+
         card.dataset.symbol = symbol;
         card.dataset.index = index;
-        card.setAttribute("aria-label", "Thẻ chưa mở");
+
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="card-front">?</div>
+                <div class="card-back">${symbol}</div>
+            </div>
+        `;
 
         card.addEventListener("click", () => {
             flipCard(card);
         });
 
         board.appendChild(card);
+
+        cards.push(card);
     });
 }
 
-// Bắt đầu đồng hồ
+
+// ==========================================
+// 8. BẮT ĐẦU ĐẾM THỜI GIAN
+// ==========================================
+
 function startTimer() {
     if (timerInterval) return;
 
     timerInterval = setInterval(() => {
+        if (completed) return;
+
         seconds++;
 
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-
-        timerElement.textContent =
-            String(minutes).padStart(2, "0") + ":" +
-            String(remainingSeconds).padStart(2, "0");
+        updateDisplay();
 
     }, 1000);
 }
 
-// Lật thẻ
+
+// ==========================================
+// 9. LẬT THẺ
+// ==========================================
+
 function flipCard(card) {
-    if (
-        locked ||
-        completed ||
-        card.classList.contains("flipped") ||
-        card.classList.contains("matched")
-    ) {
-        return;
-    }
+    if (locked || completed) return;
+
+    if (card.classList.contains("flipped")) return;
+
+    if (card.classList.contains("matched")) return;
 
     if (!started) {
         started = true;
+
         startTimer();
 
         sendToParent("GAME_START", {
-            gameId: gameSession.gameId,
-            sessionId: gameSession.sessionId
+            gameId: GAME_ID,
+            studentId: studentId,
+            sessionId: sessionId
         });
     }
 
-    card.textContent = card.dataset.symbol;
     card.classList.add("flipped");
-    soundFlip();
-    card.setAttribute("aria-label", "Thẻ " + card.dataset.symbol);
 
     flippedCards.push(card);
 
+    soundFlip();
+
     if (flippedCards.length === 2) {
         moves++;
-        movesElement.textContent = moves;
+
+        updateDisplay();
+
         checkMatch();
     }
 }
 
-// Kiểm tra hai thẻ
+
+// ==========================================
+// 10. KIỂM TRA CẶP THẺ
+// ==========================================
+
 function checkMatch() {
-    const [first, second] = flippedCards;
+    const [card1, card2] = flippedCards;
 
-    if (first.dataset.symbol === second.dataset.symbol) {
-        soundMatch();
-        first.classList.remove("flipped");
-        second.classList.remove("flipped");
+    const symbol1 = card1.dataset.symbol;
+    const symbol2 = card2.dataset.symbol;
 
-        first.classList.add("matched");
-        second.classList.add("matched");
+    if (symbol1 === symbol2) {
 
-        first.disabled = true;
-        second.disabled = true;
+        // Ghép đúng
+        card1.classList.add("matched");
+        card2.classList.add("matched");
 
         matchedPairs++;
-        score += 100;
 
-        scoreElement.textContent = score;
+        score = matchedPairs * 100;
+
+        soundMatch();
 
         flippedCards = [];
 
-        messageElement.textContent =
-            "🎉 Chính xác! Bạn tìm được một cặp hình!";
+        updateDisplay();
 
         sendToParent("GAME_PROGRESS", {
-            gameId: gameSession.gameId,
-            sessionId: gameSession.sessionId,
+            gameId: GAME_ID,
             score: score,
-            correct: matchedPairs,
-            moves: moves
+            moves: moves,
+            matchedPairs: matchedPairs,
+            totalPairs: symbols.length
         });
 
         if (matchedPairs === symbols.length) {
@@ -329,96 +329,207 @@ function checkMatch() {
         }
 
     } else {
-        soundWrong();
+
+        // Ghép sai
         locked = true;
 
-        messageElement.textContent =
-            "Chưa đúng rồi! Hãy cố gắng ghi nhớ nhé!";
+        soundWrong();
+
+        if (messageDisplay) {
+            messageDisplay.textContent =
+                "Chưa đúng! Hãy thử lại nhé.";
+        }
 
         setTimeout(() => {
-            first.textContent = "❓";
-            second.textContent = "❓";
 
-            first.classList.remove("flipped");
-            second.classList.remove("flipped");
-
-            first.setAttribute("aria-label", "Thẻ chưa mở");
-            second.setAttribute("aria-label", "Thẻ chưa mở");
+            card1.classList.remove("flipped");
+            card2.classList.remove("flipped");
 
             flippedCards = [];
+
             locked = false;
-        }, 850);
+
+            if (messageDisplay && !completed) {
+                messageDisplay.textContent =
+                    "Hãy tiếp tục tìm các cặp hình!";
+            }
+
+        }, 800);
     }
 }
 
-// Hoàn thành trò chơi
+
+// ==========================================
+// 11. CẬP NHẬT THÔNG TIN
+// ==========================================
+
+function updateDisplay() {
+    if (scoreDisplay) {
+        scoreDisplay.textContent = score;
+    }
+
+    if (movesDisplay) {
+        movesDisplay.textContent = moves;
+    }
+
+    if (timerDisplay) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+
+        timerDisplay.textContent =
+            String(minutes).padStart(2, "0") +
+            ":" +
+            String(remainingSeconds).padStart(2, "0");
+    }
+}
+
+
+// ==========================================
+// 12. KẾT THÚC GAME
+// ==========================================
+
 function finishGame() {
     completed = true;
-    soundWin();
+
     clearInterval(timerInterval);
+
     timerInterval = null;
 
+    soundWin();
+
+    if (messageDisplay) {
+        messageDisplay.textContent =
+            "Chúc mừng! Bạn đã tìm được tất cả các cặp!";
+    }
+
+    const correct = matchedPairs;
+    const wrong = moves - matchedPairs;
+
     const accuracy = moves > 0
-        ? Math.round((symbols.length / moves) * 100)
+        ? Math.round((correct / moves) * 100)
         : 100;
 
-    const finalScore = Math.max(
-        0,
-        Math.round(score + Math.max(0, 100 - moves * 3))
-    );
+    if (finalResult) {
+        finalResult.innerHTML = `
+            <p>🏆 Hoàn thành trò chơi!</p>
+            <p>Điểm số: <strong>${score}</strong></p>
+            <p>Số lượt chơi: <strong>${moves}</strong></p>
+            <p>Số cặp đúng: <strong>${correct}</strong></p>
+            <p>Số lượt sai: <strong>${wrong}</strong></p>
+            <p>Thời gian: <strong>${timerDisplay.textContent}</strong></p>
+            <p>Độ chính xác: <strong>${accuracy}%</strong></p>
+        `;
+    }
 
-    score = finalScore;
-    scoreElement.textContent = score;
+    if (resultModal) {
+        resultModal.style.display = "flex";
+    }
 
-    messageElement.textContent =
-        "🏆 Xuất sắc! Bạn đã tìm được tất cả các cặp!";
-
-    finalResult.innerHTML = `
-        <p>⭐ Điểm số: ${score}</p>
-        <p>🔄 Số lượt lật: ${moves}</p>
-        <p>⏱️ Thời gian: ${timerElement.textContent}</p>
-        <p>🎯 Số cặp tìm được: ${matchedPairs}/8</p>
-    `;
-
-    modal.classList.remove("hidden");
-
-    // Gửi kết quả về website quản lý
     sendToParent("GAME_COMPLETED", {
-        sessionId: gameSession.sessionId,
-        studentId: gameSession.studentId,
-        gameId: gameSession.gameId,
+        gameId: GAME_ID,
+        studentId: studentId,
+        sessionId: sessionId,
+
         score: score,
         totalPairs: symbols.length,
-        correct: matchedPairs,
-        wrong: moves - matchedPairs,
+        correct: correct,
+        wrong: wrong,
+
         moves: moves,
         duration: seconds,
         accuracy: accuracy,
+
         status: "completed"
     });
 }
 
-// Bắt đầu hoặc chơi lại
-function startGame() {
+
+// ==========================================
+// 13. CHƠI LẠI
+// ==========================================
+
+function restartGame() {
+    soundRestart();
+
     initGame();
 }
 
-// Nút chơi lại
-document.getElementById("restartBtn").addEventListener("click", () => {
-    soundRestart();
-    initGame();
+if (restartBtn) {
+    restartBtn.addEventListener("click", restartGame);
+}
+
+if (playAgainBtn) {
+    playAgainBtn.addEventListener("click", restartGame);
+}
+
+
+// ==========================================
+// 14. BẬT / TẮT ÂM THANH
+// ==========================================
+
+if (soundBtn) {
+    soundBtn.textContent = "🔊 Âm thanh: BẬT";
+
+    soundBtn.addEventListener("click", () => {
+
+        soundEnabled = !soundEnabled;
+
+        soundBtn.textContent = soundEnabled
+            ? "🔊 Âm thanh: BẬT"
+            : "🔇 Âm thanh: TẮT";
+
+        if (soundEnabled) {
+            playSound("click");
+        }
+    });
+}
+
+
+// ==========================================
+// 15. NHẬN DỮ LIỆU TỪ WEBSITE CHA
+// ==========================================
+
+window.addEventListener("message", (event) => {
+
+    const data = event.data;
+
+    if (!data || data.protocol !== PROTOCOL) return;
+
+    switch (data.type) {
+
+        case "GAME_INIT":
+
+            studentId = data.studentId || null;
+            sessionId = data.sessionId || null;
+
+            initGame();
+
+            break;
+
+        case "GAME_START":
+
+            studentId = data.studentId || studentId;
+            sessionId = data.sessionId || sessionId;
+
+            initGame();
+
+            started = true;
+
+            startTimer();
+
+            break;
+
+        case "GAME_RESTART":
+
+            restartGame();
+
+            break;
+    }
 });
 
-document.getElementById("playAgainBtn").addEventListener("click", () => {
-    soundRestart();
-    initGame();
-});
 
-// Khởi động khi mở trang
+// ==========================================
+// 16. KHỞI ĐỘNG
+// ==========================================
+
 initGame();
-
-// Thông báo sẵn sàng cho website cha
-sendToParent("GAME_READY", {
-    gameId: gameSession.gameId,
-    protocol: "1.0"
-});
