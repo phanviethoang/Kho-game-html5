@@ -261,6 +261,7 @@ function flipCard(card) {
 
     card.textContent = card.dataset.symbol;
     card.classList.add("flipped");
+    soundFlip();
     card.setAttribute("aria-label", "Thẻ " + card.dataset.symbol);
 
     flippedCards.push(card);
@@ -277,6 +278,7 @@ function checkMatch() {
     const [first, second] = flippedCards;
 
     if (first.dataset.symbol === second.dataset.symbol) {
+        soundMatch();
         first.classList.remove("flipped");
         second.classList.remove("flipped");
 
@@ -309,6 +311,7 @@ function checkMatch() {
         }
 
     } else {
+        soundWrong();
         locked = true;
 
         messageElement.textContent =
@@ -333,7 +336,7 @@ function checkMatch() {
 // Hoàn thành trò chơi
 function finishGame() {
     completed = true;
-
+    soundWin();
     clearInterval(timerInterval);
     timerInterval = null;
 
@@ -384,10 +387,12 @@ function startGame() {
 
 // Nút chơi lại
 document.getElementById("restartBtn").addEventListener("click", () => {
+    soundRestart();
     initGame();
 });
 
 document.getElementById("playAgainBtn").addEventListener("click", () => {
+    soundRestart();
     initGame();
 });
 
