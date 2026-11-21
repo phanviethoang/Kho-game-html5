@@ -1,0 +1,246 @@
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #dff5ff, #eee5ff, #fff0dc);
+    color: #26345b;
+    padding: 24px 14px;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 850px;
+    margin: auto;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 28px;
+    box-shadow: 0 12px 40px rgba(65, 75, 130, 0.15);
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo {
+    font-size: 55px;
+    margin-bottom: 8px;
+}
+
+.game-header h1 {
+    color: #6352c7;
+    font-size: clamp(24px, 5vw, 34px);
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.game-header p {
+    margin-top: 9px;
+    color: #77809b;
+    font-size: 16px;
+}
+
+.game-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.info-box {
+    text-align: center;
+    background: #f1f0ff;
+    padding: 15px 8px;
+    border-radius: 17px;
+    border-bottom: 4px solid #c8c0ff;
+}
+
+.info-box span {
+    display: block;
+    font-size: 14px;
+    color: #777b9b;
+    margin-bottom: 7px;
+}
+
+.info-box strong {
+    display: block;
+    font-size: 25px;
+    color: #6252c7;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-width: 580px;
+    margin: 0 auto;
+}
+
+.card {
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 17px;
+    background: linear-gradient(145deg, #8173e8, #5e50c6);
+    color: white;
+    font-size: clamp(26px, 6vw, 43px);
+    cursor: pointer;
+    box-shadow: 0 5px 0 #44379d;
+    transition: transform 0.2s, background 0.2s;
+    user-select: none;
+}
+
+.card:hover:not(:disabled) {
+    transform: translateY(-3px);
+}
+
+.card.flipped,
+.card.matched {
+    background: #e5f8ed;
+    color: #26345b;
+    box-shadow: 0 4px 0 #a6dfbd;
+    cursor: default;
+}
+
+.card.matched {
+    background: #c8f5d8;
+    border: 3px solid #62cf8a;
+}
+
+.card:disabled {
+    opacity: 1;
+}
+
+.game-actions {
+    text-align: center;
+    margin-top: 25px;
+}
+
+button {
+    font-family: inherit;
+}
+
+#restartBtn,
+#playAgainBtn {
+    border: none;
+    background: linear-gradient(135deg, #ff9f43, #ff743d);
+    color: white;
+    font-size: 17px;
+    font-weight: 800;
+    padding: 13px 28px;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #d65b2c;
+    transition: transform 0.2s;
+}
+
+#restartBtn:hover,
+#playAgainBtn:hover {
+    transform: translateY(-2px);
+}
+
+.message {
+    text-align: center;
+    margin-top: 23px;
+    padding: 15px;
+    border-radius: 14px;
+    background: #fff6df;
+    color: #9a6b19;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: rgba(30, 30, 65, 0.65);
+}
+
+.hidden {
+    display: none;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 400px;
+    padding: 32px 22px;
+    border-radius: 25px;
+    background: white;
+    text-align: center;
+    animation: appear 0.3s ease;
+}
+
+.trophy {
+    font-size: 70px;
+    margin-bottom: 10px;
+}
+
+.modal-content h2 {
+    color: #6252c7;
+    font-size: 30px;
+    margin-bottom: 12px;
+}
+
+.modal-content p {
+    color: #77809b;
+    margin-bottom: 15px;
+}
+
+#finalResult {
+    line-height: 2;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 12px 8px;
+    }
+
+    .game-container {
+        padding: 20px 13px;
+        border-radius: 20px;
+    }
+
+    .game-board {
+        gap: 8px;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+
+    .info-box {
+        padding: 12px 4px;
+    }
+
+    .info-box span {
+        font-size: 12px;
+    }
+
+    .info-box strong {
+        font-size: 21px;
+    }
+}
