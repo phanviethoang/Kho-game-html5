@@ -2,13 +2,56 @@
 {
   "gameId": "G001",
   "name": "Memory Match - Lật thẻ tìm cặp",
-  "description": "Trò chơi rèn luyện trí nhớ và tư duy logic.",
-  "version": "1.0.0",
+  "version": "7.0.0",
   "category": "IQ",
-  "grade": [3, 4, 5],
-  "difficulty": "easy",
+  "grades": [3, 4, 5],
+  "difficulty": "adaptive",
   "entry": "index.html",
   "status": "active",
   "protocol": "1.0",
-  "author": "Thu vien game hoc tap"
+  "description": "Trò chơi lật 36 thẻ để tìm 18 cặp hình giống nhau. Độ khó được xác định bởi Level do hệ thống bên ngoài truyền vào.",
+  "configuration": {
+    "boardRows": 6,
+    "boardColumns": 6,
+    "totalCards": 36,
+    "totalPairs": 18,
+    "initialOpens": 72,
+    "levels": [
+      {
+        "level": 1,
+        "types": 2,
+        "pairDistribution": [9, 9]
+      },
+      {
+        "level": 2,
+        "types": 3,
+        "pairDistribution": [6, 6, 6]
+      },
+      {
+        "level": 3,
+        "types": 4,
+        "pairDistribution": [5, 5, 4, 4]
+      },
+      {
+        "level": 4,
+        "types": 5,
+        "pairDistribution": [4, 4, 4, 3, 3]
+      },
+      {
+        "level": 5,
+        "types": 6,
+        "pairDistribution": [3, 3, 3, 3, 3, 3]
+      }
+    ],
+    "help": {
+      "revealPair": {
+        "xpCost": 10,
+        "effect": "Reveal one matching pair"
+      },
+      "addOpens": {
+        "xpCost": 10,
+        "opensAdded": 10
+      }
+    }
+  }
 }
