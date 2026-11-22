@@ -2,372 +2,129 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>G001 - Memory Match</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#172554">
+  <title>G001 - Memory Match</title>
 
-<link rel="stylesheet" href="../../00_SHARED_ASSETS/pyquest-hud.css?v=2">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../../00_SHARED_ASSETS/pyquest-hud.css">
 
-<style>
-:root {
-    --primary: #536dfe;
-    --primary-dark: #3949ab;
-    --success: #16a34a;
-    --danger: #dc2626;
-    --warning: #f59e0b;
-    --bg: #f3f6ff;
-    --card-bg: #ffffff;
-    --text: #243047;
-    --muted: #64748b;
-}
-
-* { box-sizing: border-box; }
-
-body {
-    margin: 0;
-    padding: 72px 12px 24px;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-.container {
-    width: min(900px, 100%);
-    margin: auto;
-}
-
-.header {
-    text-align: center;
-    margin-bottom: 16px;
-}
-
-.header h1 {
-    margin: 0 0 6px;
-    font-size: clamp(24px, 5vw, 34px);
-    color: var(--primary-dark);
-}
-
-.header p {
-    margin: 0;
-    color: var(--muted);
-}
-
-.level-progress {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 7px;
-    margin: 18px 0;
-}
-
-.level-step {
-    padding: 10px 4px;
-    text-align: center;
-    border-radius: 12px;
-    background: #e2e8f0;
-    color: #64748b;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-.level-step.active {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 3px 10px #536dfe55;
-}
-
-.level-step.done {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.level-title {
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    margin: 12px 0;
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 9px;
-    margin: 14px 0;
-}
-
-.stat {
-    background: white;
-    border-radius: 13px;
-    padding: 12px 5px;
-    text-align: center;
-    box-shadow: 0 2px 8px #1e293b0d;
-}
-
-.stat-label {
-    display: block;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    font-size: clamp(17px, 4vw, 23px);
-    font-weight: bold;
-}
-
-.xp-value { color: #d97706; }
-.moves-value { color: var(--primary); }
-.time-value { color: #0891b2; }
-.open-value { color: #16a34a; }
-
-.message {
-    min-height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 8px;
-    font-weight: bold;
-    color: var(--primary-dark);
-}
-
-.game-board {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
-    max-width: 650px;
-    margin: 0 auto;
-}
-
-.card {
-    border: 0;
-    padding: 0;
-    background: transparent;
-    cursor: pointer;
-    aspect-ratio: 1 / 1;
-    min-width: 0;
-    perspective: 700px;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.card-inner {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.35s ease;
-}
-
-.card.flipped .card-inner,
-.card.matched .card-inner {
-    transform: rotateY(180deg);
-}
-
-.card-face {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 14px;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    box-shadow: 0 3px 8px #1e293b18;
-}
-
-.card-front {
-    background: linear-gradient(145deg, #667eea, #536dfe);
-    color: white;
-    font-size: clamp(22px, 5vw, 34px);
-    font-weight: bold;
-}
-
-.card-back {
-    transform: rotateY(180deg);
-    background: white;
-    border: 3px solid #c7d2fe;
-    font-size: clamp(30px, 7vw, 48px);
-}
-
-.card.matched .card-back {
-    background: #dcfce7;
-    border-color: #86efac;
-}
-
-.card:disabled {
-    cursor: default;
-}
-
-.help-panel {
-    margin: 18px auto;
-    max-width: 650px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.help-btn {
-    border: 0;
-    border-radius: 13px;
-    padding: 13px 8px;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-    background: var(--primary);
-    box-shadow: 0 3px 8px #536dfe33;
-}
-
-.help-btn.secondary {
-    background: #0f766e;
-}
-
-.help-btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.help-btn small {
-    display: block;
-    margin-top: 5px;
-    font-size: 12px;
-    font-weight: normal;
-}
-
-.bottom-info {
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-    margin-top: 12px;
-}
-
-.overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: #0f172acc;
-    padding: 18px;
-    align-items: center;
-    justify-content: center;
-}
-
-.overlay.show { display: flex; }
-
-.result-box {
-    background: white;
-    width: min(440px, 100%);
-    border-radius: 20px;
-    padding: 25px 20px;
-    text-align: center;
-    box-shadow: 0 15px 50px #0004;
-}
-
-.result-box h2 {
-    margin: 0 0 12px;
-    color: var(--primary-dark);
-}
-
-.result-details {
-    line-height: 1.8;
-    text-align: left;
-    margin: 15px 0;
-    background: #f8fafc;
-    padding: 14px;
-    border-radius: 12px;
-}
-
-.result-note {
-    color: var(--muted);
-    font-size: 13px;
-}
-
-@media (max-width: 520px) {
-    body { padding-left: 8px; padding-right: 8px; }
-    .game-board { gap: 7px; }
-    .card-face { border-radius: 9px; }
-    .card-back { border-width: 2px; }
-    .stats { gap: 6px; }
-    .stat { padding: 10px 3px; }
-    .level-step { font-size: 11px; padding: 9px 2px; }
-}
-
-@media (min-width: 700px) {
-    .game-board { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-}
-</style>
+  <script src="../../00_SHARED_ASSETS/SoundManager.js"></script>
+  <script src="../../00_SHARED_ASSETS/pyquest-bridge.js"></script>
 </head>
 
 <body>
-<div class="container">
+  <main class="game-container">
+    <header class="game-header">
+      <div class="game-heading">
+        <div class="game-icon">🧠</div>
+        <div>
+          <h1>Memory Match</h1>
+          <p class="subtitle">Lật thẻ tìm các cặp hình giống nhau</p>
+        </div>
+      </div>
 
-    <header class="header">
-        <h1>🧠 MEMORY MATCH</h1>
-        <p>Lật thẻ và tìm những cặp hình giống nhau</p>
+      <button id="soundBtn" class="sound-button" type="button" aria-label="Bật hoặc tắt âm thanh">
+        🔊
+      </button>
     </header>
 
-    <div class="level-progress" id="levelProgress">
-        <div class="level-step active" data-level="1">Level 1</div>
-        <div class="level-step" data-level="2">Level 2</div>
-        <div class="level-step" data-level="3">Level 3</div>
-        <div class="level-step" data-level="4">Level 4</div>
-        <div class="level-step" data-level="5">Level 5</div>
-    </div>
-
-    <div class="level-title" id="levelTitle">Level 1 - Khởi động</div>
-
-    <section class="stats">
-        <div class="stat">
-            <span class="stat-label">⭐ XP còn lại</span>
-            <span class="stat-value xp-value" id="xpValue">0</span>
-        </div>
-        <div class="stat">
-            <span class="stat-label">🎯 Lượt mở</span>
-            <span class="stat-value open-value" id="openValue">24</span>
-        </div>
-        <div class="stat">
-            <span class="stat-label">🔄 Số lượt ghép</span>
-            <span class="stat-value moves-value" id="movesValue">0</span>
-        </div>
-        <div class="stat">
-            <span class="stat-label">⏱ Thời gian</span>
-            <span class="stat-value time-value" id="timeValue">0:00</span>
-        </div>
+    <section class="stats-panel" aria-label="Thông tin trò chơi">
+      <div class="stat-item">
+        <span class="stat-label">Lượt mở còn lại</span>
+        <strong id="remainingOpens">72</strong>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Cặp đã tìm</span>
+        <strong id="matchedCount">0/18</strong>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Thời gian</span>
+        <strong id="timer">00:00</strong>
+      </div>
     </section>
 
-    <div class="message" id="message">
-        Đang chờ bắt đầu trò chơi...
-    </div>
-
-    <main class="game-board" id="gameBoard"></main>
+    <section class="progress-section">
+      <div class="progress-caption">
+        <span>Tiến độ hoàn thành</span>
+        <strong id="progressText">0%</strong>
+      </div>
+      <div class="progress-track">
+        <div id="progressBar" class="progress-fill"></div>
+      </div>
+    </section>
 
     <section class="help-panel">
-        <button class="help-btn" id="revealBtn" type="button" disabled>
-            💡 Mở giúp 1 cặp
-            <small>Chi phí: 10 XP</small>
+      <div class="help-heading">
+        <div>
+          <h2>Trợ giúp</h2>
+          <p>XP hiện có: <strong id="xpValue">0</strong></p>
+        </div>
+      </div>
+
+      <div class="help-buttons">
+        <button id="revealPairBtn" class="help-button" type="button">
+          <span class="help-icon">💡</span>
+          <span class="help-text">
+            <strong>Mở một cặp</strong>
+            <small>Trừ 10 XP</small>
+          </span>
         </button>
 
-        <button class="help-btn secondary" id="addOpensBtn" type="button" disabled>
-            ➕ Thêm lượt mở
-            <small>+10 lượt mở · 10 XP</small>
+        <button id="addOpensBtn" class="help-button" type="button">
+          <span class="help-icon">➕</span>
+          <span class="help-text">
+            <strong>Thêm 10 lượt mở</strong>
+            <small>Trừ 10 XP</small>
+          </span>
         </button>
+      </div>
     </section>
 
-    <div class="bottom-info">
-        Hoàn thành đủ 5 cấp độ để chinh phục trò chơi!
+    <div id="message" class="message" role="status" aria-live="polite">
+      Hãy lật hai thẻ để tìm cặp hình giống nhau!
     </div>
-</div>
 
-<div class="overlay" id="resultModal">
-    <div class="result-box">
-        <h2 id="resultTitle">Kết quả</h2>
-        <div id="resultDetails" class="result-details"></div>
-        <p class="result-note">Kết quả đã được gửi về chương trình học tập.</p>
+    <section class="board-section">
+      <div id="gameBoard" class="game-board" aria-label="Bàn chơi Memory Match"></div>
+    </section>
+
+    <footer class="game-footer">
+      <span>🎯 Tìm đủ 18 cặp hình để hoàn thành trò chơi</span>
+    </footer>
+  </main>
+
+  <div id="resultModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modal-card">
+      <div id="resultIcon" class="result-icon">🏆</div>
+      <h2 id="resultTitle">Hoàn thành!</h2>
+      <p id="resultMessage"></p>
+
+      <div class="result-stats">
+        <div>
+          <span>Cặp đã tìm</span>
+          <strong id="finalPairs">0/18</strong>
+        </div>
+        <div>
+          <span>Lượt mở đã dùng</span>
+          <strong id="finalOpens">0</strong>
+        </div>
+        <div>
+          <span>Thời gian</span>
+          <strong id="finalTime">00:00</strong>
+        </div>
+        <div>
+          <span>XP đã sử dụng</span>
+          <strong id="finalXpSpent">0</strong>
+        </div>
+      </div>
+
+      <p id="finalXpText" class="final-xp-text"></p>
+      <p class="closing-note">Kết quả đang được gửi về hệ thống...</p>
     </div>
-</div>
+  </div>
 
-<script src="../../00_SHARED_ASSETS/pyquest-bridge.js?v=2"></script>
-<script src="../../00_SHARED_ASSETS/SoundManager.js?v=2"></script>
-<script src="game.js?v=6"></script>
+  <script src="game.js"></script>
 </body>
 </html>
