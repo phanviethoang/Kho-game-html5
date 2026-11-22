@@ -375,7 +375,14 @@
   }
 
   function handleCardClick(card) {
-    if (!gameStarted || gameFinished || lockBoard) return;
+    if (gameFinished || lockBoard) return;
+
+  // Nếu hệ thống chưa gửi GAME_START,
+  // lần bấm thẻ đầu tiên sẽ tự khởi động game.
+     if (!gameStarted) {
+       startGame();
+     }
+
     if (card.matched) return;
     if (firstCard === card) return;
 
@@ -943,30 +950,36 @@
     startGame();
   }
 
-  function bootGame() {
-    updateSoundButton();
+  
+function bootGame() {
+  updateSoundButton();
 
-    const connected = connectBridge();
+  const connected = connectBridge();
 
-    if (!connected) {
-      console.warn("PyQuestBridge không khả dụng. Chạy chế độ độc lập.");
-      startStandalone();
-      return;
-    }
-
-    const state = getBridgeState();
-
-    if (state.projectId === "standalone") {
-      standaloneMode = true;
-
-      if (!bridgeInitialized) {
-        initializeGame(state);
-        bridgeInitialized = true;
-      }
-
-      startGame();
-    }
+  // Không có Bridge: chạy độc lập
+  if (!connected) {
+    console.warn("PyQuestBridge không khả dụng. Chạy chế độ độc lập.");
+    startStandalone();
+    return;
   }
+
+  const state = getBridgeState();
+
+  // Luôn tạo bàn chơi ngay khi tải game
+  if (!bridgeInitialized) {
+    initializeGame(state);
+    bridgeInitialized = true;
+  }
+
+  // Chế độ độc lập thì tự chạy ngay
+  if (state.projectId === "standalone") {
+    standaloneMode = true;
+    startGame();
+  }
+
+  console.log("G001 đã sẵn sàng.");
+}
+
 
   // -----------------------------------------------------
   // 26. START APPLICATION
