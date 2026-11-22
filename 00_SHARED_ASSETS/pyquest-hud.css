@@ -1,0 +1,67 @@
+/* ============================================================================
+
+UNIVERSAL EDTECH GAME HUD STYLE v2.0 (00_SHARED_ASSETS/pyquest-hud.css)
+
+Hỗ trợ tự động thích ứng Dark Mode & Classroom Light Mode từ dự án mẹ.
+
+============================================================================ */
+#pq-shared-hud {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+z-index: 9999;
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+justify-content: space-between;
+gap: 8px;
+padding: 6px 14px;
+background: rgba(7, 11, 20, 0.92);
+border-bottom: 1px solid rgba(56, 189, 248, 0.35);
+color: #f8fafc;
+font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+font-size: 12px;
+backdrop-filter: blur(8px);
+}
+
+[data-pq-theme="classroom_light"] #pq-shared-hud {
+background: rgba(255, 255, 255, 0.95);
+border-bottom: 1px solid rgba(2, 132, 199, 0.3);
+color: #0f172a;
+}
+
+.pq-hud-group {
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+gap: 6px;
+}
+
+.pq-hud-item {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+padding: 2px 9px;
+border-radius: 999px;
+background: rgba(255, 255, 255, 0.08);
+}
+
+[data-pq-theme="classroom_light"] .pq-hud-item {
+background: rgba(15, 23, 42, 0.06);
+}
+
+.pq-hud-item strong {
+color: #38bdf8;
+}
+
+[data-pq-theme="classroom_light"] .pq-hud-item strong {
+color: #0284c7;
+}
+
+.pq-badge-warn {
+background: rgba(245, 158, 11, 0.2);
+color: #fbbf24;
+border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
