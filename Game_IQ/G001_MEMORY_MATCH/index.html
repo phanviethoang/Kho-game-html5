@@ -2,325 +2,372 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Match - Lật thẻ tìm cặp</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G001 - Memory Match</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<link rel="stylesheet" href="../../00_SHARED_ASSETS/pyquest-hud.css?v=2">
 
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #74ebd5, #9face6);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+<style>
+:root {
+    --primary: #536dfe;
+    --primary-dark: #3949ab;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --bg: #f3f6ff;
+    --card-bg: #ffffff;
+    --text: #243047;
+    --muted: #64748b;
+}
 
-        .game-container {
-            width: 100%;
-            max-width: 650px;
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 22px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            text-align: center;
-        }
+* { box-sizing: border-box; }
 
-        h1 {
-            color: #334155;
-            margin: 0 0 20px;
-            font-size: 28px;
-        }
+body {
+    margin: 0;
+    padding: 72px 12px 24px;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+}
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+.container {
+    width: min(900px, 100%);
+    margin: auto;
+}
 
-        .stat-box {
-            background: #eff6ff;
-            border-radius: 12px;
-            padding: 12px 5px;
-        }
+.header {
+    text-align: center;
+    margin-bottom: 16px;
+}
 
-        .stat-label {
-            color: #64748b;
-            font-size: 13px;
-            margin-bottom: 5px;
-        }
+.header h1 {
+    margin: 0 0 6px;
+    font-size: clamp(24px, 5vw, 34px);
+    color: var(--primary-dark);
+}
 
-        .stat-value {
-            color: #2563eb;
-            font-size: 23px;
-            font-weight: bold;
-        }
+.header p {
+    margin: 0;
+    color: var(--muted);
+}
 
-        .game-board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin: 20px auto;
-            max-width: 500px;
-        }
+.level-progress {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 7px;
+    margin: 18px 0;
+}
 
-        .card {
-            aspect-ratio: 1 / 1;
-            cursor: pointer;
-            perspective: 800px;
-            user-select: none;
-        }
+.level-step {
+    padding: 10px 4px;
+    text-align: center;
+    border-radius: 12px;
+    background: #e2e8f0;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: bold;
+}
 
-        .card-inner {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.45s;
-        }
+.level-step.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 3px 10px #536dfe55;
+}
 
-        .card.flipped .card-inner,
-        .card.matched .card-inner {
-            transform: rotateY(180deg);
-        }
+.level-step.done {
+    background: #dcfce7;
+    color: #15803d;
+}
 
-        .card-front,
-        .card-back {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 14px;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
+.level-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 12px 0;
+}
 
-        /* Mặt úp: chỉ có một dấu hỏi từ HTML */
-        .card-front {
-            background: linear-gradient(145deg, #2563eb, #1d4ed8);
-            color: white;
-            font-size: clamp(25px, 6vw, 42px);
-            font-weight: bold;
-            border: 3px solid #bfdbfe;
-        }
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+    margin: 14px 0;
+}
 
-        /* Mặt có hình */
-        .card-back {
-            background: linear-gradient(145deg, #fef3c7, #fde68a);
-            transform: rotateY(180deg);
-            font-size: clamp(30px, 7vw, 48px);
-            border: 3px solid #fbbf24;
-        }
+.stat {
+    background: white;
+    border-radius: 13px;
+    padding: 12px 5px;
+    text-align: center;
+    box-shadow: 0 2px 8px #1e293b0d;
+}
 
-        .card.matched .card-back {
-            background: #dcfce7;
-            border-color: #22c55e;
-            cursor: default;
-        }
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 5px;
+}
 
-        .card:not(.matched):hover {
-            transform: scale(1.03);
-        }
+.stat-value {
+    font-size: clamp(17px, 4vw, 23px);
+    font-weight: bold;
+}
 
-        .message {
-            min-height: 28px;
-            margin: 15px 0;
-            color: #475569;
-            font-size: 16px;
-            font-weight: bold;
-        }
+.xp-value { color: #d97706; }
+.moves-value { color: var(--primary); }
+.time-value { color: #0891b2; }
+.open-value { color: #16a34a; }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-        }
+.message {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    font-weight: bold;
+    color: var(--primary-dark);
+}
 
-        button {
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 650px;
+    margin: 0 auto;
+}
 
-        button:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
+.card {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    perspective: 700px;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        #restartBtn {
-            background: #2563eb;
-            color: white;
-        }
+.card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.35s ease;
+}
 
-        #soundBtn {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
+.card.flipped .card-inner,
+.card.matched .card-inner {
+    transform: rotateY(180deg);
+}
 
-        /* Hộp kết quả */
-        .result-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.65);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            z-index: 100;
-        }
+.card-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 3px 8px #1e293b18;
+}
 
-        .result-modal.show {
-            display: flex;
-        }
+.card-front {
+    background: linear-gradient(145deg, #667eea, #536dfe);
+    color: white;
+    font-size: clamp(22px, 5vw, 34px);
+    font-weight: bold;
+}
 
-        .result-content {
-            background: white;
-            padding: 30px;
-            width: 100%;
-            max-width: 380px;
-            border-radius: 20px;
-            text-align: center;
-            animation: appear 0.3s ease;
-        }
+.card-back {
+    transform: rotateY(180deg);
+    background: white;
+    border: 3px solid #c7d2fe;
+    font-size: clamp(30px, 7vw, 48px);
+}
 
-        .result-content h2 {
-            color: #16a34a;
-            margin-top: 0;
-        }
+.card.matched .card-back {
+    background: #dcfce7;
+    border-color: #86efac;
+}
 
-        #finalResult {
-            line-height: 1.8;
-            color: #334155;
-        }
+.card:disabled {
+    cursor: default;
+}
 
-        #playAgainBtn {
-            background: #16a34a;
-            color: white;
-            margin-top: 10px;
-        }
+.help-panel {
+    margin: 18px auto;
+    max-width: 650px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
 
-        @keyframes appear {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
+.help-btn {
+    border: 0;
+    border-radius: 13px;
+    padding: 13px 8px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    background: var(--primary);
+    box-shadow: 0 3px 8px #536dfe33;
+}
 
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
+.help-btn.secondary {
+    background: #0f766e;
+}
 
-            .game-container {
-                padding: 15px;
-            }
+.help-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
 
-            h1 {
-                font-size: 23px;
-            }
+.help-btn small {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: normal;
+}
 
-            .game-board {
-                gap: 8px;
-            }
+.bottom-info {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 12px;
+}
 
-            .card-front,
-            .card-back {
-                border-radius: 10px;
-            }
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: #0f172acc;
+    padding: 18px;
+    align-items: center;
+    justify-content: center;
+}
 
-            button {
-                padding: 10px 15px;
-                font-size: 14px;
-            }
-        }
-    </style>
+.overlay.show { display: flex; }
+
+.result-box {
+    background: white;
+    width: min(440px, 100%);
+    border-radius: 20px;
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 15px 50px #0004;
+}
+
+.result-box h2 {
+    margin: 0 0 12px;
+    color: var(--primary-dark);
+}
+
+.result-details {
+    line-height: 1.8;
+    text-align: left;
+    margin: 15px 0;
+    background: #f8fafc;
+    padding: 14px;
+    border-radius: 12px;
+}
+
+.result-note {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+@media (max-width: 520px) {
+    body { padding-left: 8px; padding-right: 8px; }
+    .game-board { gap: 7px; }
+    .card-face { border-radius: 9px; }
+    .card-back { border-width: 2px; }
+    .stats { gap: 6px; }
+    .stat { padding: 10px 3px; }
+    .level-step { font-size: 11px; padding: 9px 2px; }
+}
+
+@media (min-width: 700px) {
+    .game-board { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+</style>
 </head>
 
 <body>
+<div class="container">
 
-    <main class="game-container">
-
+    <header class="header">
         <h1>🧠 MEMORY MATCH</h1>
+        <p>Lật thẻ và tìm những cặp hình giống nhau</p>
+    </header>
 
-        <div class="stats">
-
-            <div class="stat-box">
-                <div class="stat-label">ĐIỂM SỐ</div>
-                <div class="stat-value" id="score">0</div>
-            </div>
-
-            <div class="stat-box">
-                <div class="stat-label">SỐ LƯỢT</div>
-                <div class="stat-value" id="moves">0</div>
-            </div>
-
-            <div class="stat-box">
-                <div class="stat-label">THỜI GIAN</div>
-                <div class="stat-value" id="timer">00:00</div>
-            </div>
-
-        </div>
-
-        <div class="message" id="message">
-            Hãy tìm các cặp hình giống nhau!
-        </div>
-
-        <div class="game-board" id="gameBoard"></div>
-
-        <div class="controls">
-
-            <button id="restartBtn">
-                🔄 Chơi lại
-            </button>
-
-            <button id="soundBtn">
-                🔊 Âm thanh: Bật
-            </button>
-
-        </div>
-
-    </main>
-
-    <!-- Hộp kết quả -->
-    <div class="result-modal" id="resultModal">
-
-        <div class="result-content">
-
-            <h2>🎉 Hoàn thành!</h2>
-
-            <div id="finalResult"></div>
-
-            <button id="playAgainBtn">
-                🔄 Chơi lại
-            </button>
-
-        </div>
-
+    <div class="level-progress" id="levelProgress">
+        <div class="level-step active" data-level="1">Level 1</div>
+        <div class="level-step" data-level="2">Level 2</div>
+        <div class="level-step" data-level="3">Level 3</div>
+        <div class="level-step" data-level="4">Level 4</div>
+        <div class="level-step" data-level="5">Level 5</div>
     </div>
 
-    <!-- Thư viện âm thanh dùng chung phải tải trước game.js -->
-    <script src="../../00_SHARED_ASSETS/SoundManager.js?v=2"></script>
+    <div class="level-title" id="levelTitle">Level 1 - Khởi động</div>
 
-    <!-- Mã trò chơi -->
-    <script src="game.js?v=4"></script>
+    <section class="stats">
+        <div class="stat">
+            <span class="stat-label">⭐ XP còn lại</span>
+            <span class="stat-value xp-value" id="xpValue">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">🎯 Lượt mở</span>
+            <span class="stat-value open-value" id="openValue">24</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">🔄 Số lượt ghép</span>
+            <span class="stat-value moves-value" id="movesValue">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">⏱ Thời gian</span>
+            <span class="stat-value time-value" id="timeValue">0:00</span>
+        </div>
+    </section>
 
+    <div class="message" id="message">
+        Đang chờ bắt đầu trò chơi...
+    </div>
+
+    <main class="game-board" id="gameBoard"></main>
+
+    <section class="help-panel">
+        <button class="help-btn" id="revealBtn" type="button" disabled>
+            💡 Mở giúp 1 cặp
+            <small>Chi phí: 10 XP</small>
+        </button>
+
+        <button class="help-btn secondary" id="addOpensBtn" type="button" disabled>
+            ➕ Thêm lượt mở
+            <small>+10 lượt mở · 10 XP</small>
+        </button>
+    </section>
+
+    <div class="bottom-info">
+        Hoàn thành đủ 5 cấp độ để chinh phục trò chơi!
+    </div>
+</div>
+
+<div class="overlay" id="resultModal">
+    <div class="result-box">
+        <h2 id="resultTitle">Kết quả</h2>
+        <div id="resultDetails" class="result-details"></div>
+        <p class="result-note">Kết quả đã được gửi về chương trình học tập.</p>
+    </div>
+</div>
+
+<script src="../../00_SHARED_ASSETS/pyquest-bridge.js?v=2"></script>
+<script src="../../00_SHARED_ASSETS/SoundManager.js?v=2"></script>
+<script src="game.js?v=6"></script>
 </body>
 </html>
