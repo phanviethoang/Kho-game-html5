@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#070b1c">
+  <title>G002 - Space Battle</title>
+  <link rel="stylesheet" href="https://phanviethoang.github.io/Kho-game-html5/00_SHARED_ASSETS/pyquest-hud.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main id="gameRoot" class="game-root">
+    <canvas id="gameCanvas" aria-label="Khu vực chiến đấu không gian"></canvas>
+
+    <header class="hud">
+      <div class="hud-left">
+        <div class="hud-chip health-chip">
+          <span class="chip-label">NĂNG LƯỢNG</span>
+          <div class="health-track"><div id="healthFill" class="health-fill"></div></div>
+          <strong id="healthText">100%</strong>
+        </div>
+        <div class="hud-chip"><span>XP</span><strong id="xpText">10</strong></div>
+        <div class="hud-chip"><span>ĐẠN</span><strong id="weaponText">CẤP 1</strong></div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-chip"><span>LEVEL</span><strong id="levelText">1</strong></div>
+        <div class="hud-chip"><span>ĐỢT</span><strong id="waveText">1/2</strong></div>
+        <div class="hud-chip"><span>THỜI GIAN</span><strong id="timeText">00:00</strong></div>
+      </div>
+    </header>
+
+    <div id="bossHud" class="boss-hud hidden">
+      <div class="boss-title"><span id="bossName">BOSS</span><span id="bossHealthText">100%</span></div>
+      <div class="boss-track"><div id="bossHealthFill" class="boss-fill"></div></div>
+    </div>
+
+    <div id="centerNotice" class="center-notice hidden"></div>
+
+    <div class="game-actions">
+      <button id="shopButton" class="action-button shop-button" type="button" aria-label="Mở cửa hàng">⚡ CỬA HÀNG</button>
+      <button id="autoButton" class="action-button auto-button active" type="button" aria-pressed="true">TỰ ĐỘNG BẮN: BẬT</button>
+      <button id="soundButton" class="action-button sound-button" type="button" aria-label="Bật tắt âm thanh">🔊</button>
+    </div>
+
+    <div id="touchControls" class="touch-controls">
+      <div id="joystick" class="joystick" aria-label="Cần điều khiển">
+        <div id="joystickKnob" class="joystick-knob"></div>
+      </div>
+      <div class="touch-right">
+        <button id="touchFire" class="touch-fire" type="button">BẮN</button>
+        <button id="touchAuto" class="touch-auto active" type="button">AUTO</button>
+      </div>
+    </div>
+
+    <section id="shopOverlay" class="overlay hidden" aria-modal="true" role="dialog">
+      <div class="shop-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">TRẠM NÂNG CẤP</p>
+            <h1>CỬA HÀNG KHÔNG GIAN</h1>
+          </div>
+          <div class="xp-wallet">XP CỦA BẠN <strong id="shopXp">10</strong></div>
+        </div>
+        <div class="shop-columns">
+          <section class="shop-section">
+            <h2>🚀 NÂNG CẤP ĐẠN</h2>
+            <p class="section-note">Tăng sát thương và mở rộng kiểu bắn.</p>
+            <div id="weaponOptions" class="upgrade-list"></div>
+          </section>
+          <section class="shop-section heal-section">
+            <h2>💚 HỒI PHỤC</h2>
+            <p class="section-note">Mỗi lần mua hồi tối đa 30% máu.</p>
+            <div class="heal-card">
+              <div class="heal-icon">✚</div>
+              <div class="heal-info">
+                <strong>Hồi máu +30%</strong>
+                <span>Giá: 10 XP</span>
+              </div>
+              <button id="buyHeal" class="buy-button" type="button">MUA</button>
+            </div>
+            <div class="shop-health">
+              Máu hiện tại <strong id="shopHealth">100%</strong>
+            </div>
+          </section>
+        </div>
+        <div class="shop-footer">
+          <span id="shopMessage">Chọn nâng cấp phù hợp với chiến thuật của bạn.</span>
+          <button id="closeShop" class="close-shop" type="button">TIẾP TỤC CHIẾN ĐẤU</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="confirmOverlay" class="overlay hidden" aria-modal="true" role="dialog">
+      <div class="confirm-panel">
+        <div class="confirm-symbol">⚡</div>
+        <h2 id="confirmTitle">XÁC NHẬN MUA?</h2>
+        <p id="confirmText">Bạn có chắc muốn thực hiện giao dịch?</p>
+        <div class="confirm-actions">
+          <button id="confirmCancel" class="secondary-button" type="button">HỦY</button>
+          <button id="confirmAccept" class="primary-button" type="button">ĐỒNG Ý</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultOverlay" class="overlay result-overlay hidden" aria-modal="true" role="dialog">
+      <div class="result-panel">
+        <div id="resultIcon" class="result-icon">🏆</div>
+        <p class="eyebrow">KẾT QUẢ TRẬN CHIẾN</p>
+        <h1 id="resultTitle">CHIẾN THẮNG!</h1>
+        <div class="result-stats">
+          <div><span>XP ban đầu</span><strong id="initialXpResult">10</strong></div>
+          <div><span>XP còn lại</span><strong id="finalXpResult">10</strong></div>
+          <div><span>Cấp đạn cuối</span><strong id="weaponResult">CẤP 1</strong></div>
+          <div><span>Máu còn lại</span><strong id="healthResult">100%</strong></div>
+        </div>
+        <p id="resultSubtext">Bạn đã bảo vệ thành công thiên hà!</p>
+        <button id="exitGame" class="exit-game" type="button">KẾT THÚC TRÒ CHƠI</button>
+      </div>
+    </section>
+
+    <div id="startOverlay" class="start-overlay">
+      <div class="start-card">
+        <div class="start-ship">🚀</div>
+        <p class="eyebrow">NHIỆM VỤ KHÔNG GIAN</p>
+        <h1>SPACE BATTLE</h1>
+        <p>Di chuyển, né tránh và đánh bại các hạm đội ngoài hành tinh!</p>
+        <button id="startButton" class="start-button" type="button">BẮT ĐẦU CHIẾN ĐẤU</button>
+        <small>Máy tính: WASD / phím mũi tên · Chuột để ngắm</small>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://phanviethoang.github.io/Kho-game-html5/00_SHARED_ASSETS/SoundManager.js"></script>
+  <script src="https://phanviethoang.github.io/Kho-game-html5/00_SHARED_ASSETS/pyquest-bridge.js"></script>
+  <script src="./game.js"></script>
+</body>
+</html>
