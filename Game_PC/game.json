@@ -1,0 +1,60 @@
+{
+  "projectId": "G002_SPACE_BATTLE",
+  "name": "Chiến đấu không gian",
+  "version": "2.0.0",
+  "entry": "index.html",
+  "description": "Điều khiển phi thuyền chạy trái phải ở phía dưới màn hình và bắn thẳng lên trên.",
+  "protocol": "Universal EdTech Game Bridge v2.0",
+  "category": "action",
+  "controls": [
+    "ArrowLeft",
+    "ArrowRight",
+    "A",
+    "D",
+    "Space",
+    "Touch"
+  ],
+  "levels": {
+    "1": {
+      "waves": 2,
+      "boss": "Kẻ hủy diệt"
+    },
+    "2": {
+      "waves": 2,
+      "boss": "Mãng xà vũ trụ"
+    },
+    "3": {
+      "waves": 3,
+      "boss": "Đại tướng bóng đêm"
+    },
+    "4": {
+      "waves": 3,
+      "boss": "Pháo đài hủy diệt"
+    },
+    "5": {
+      "waves": 3,
+      "boss": "Chúa tể thiên hà"
+    }
+  },
+  "economy": {
+    "startingXpFallback": 10,
+    "earnXpDuringGame": false,
+    "weaponUpgradeCosts": [
+      0,
+      10,
+      15,
+      20,
+      25
+    ],
+    "heal": {
+      "cost": 10,
+      "healthPercent": 30
+    }
+  },
+  "maxDurationSeconds": 240,
+  "sharedAssets": {
+    "hud": "../../00_SHARED_ASSETS/pyquest-hud.css",
+    "bridge": "../../00_SHARED_ASSETS/pyquest-bridge.js",
+    "sound": "../../00_SHARED_ASSETS/SoundManager.js"
+  }
+}
