@@ -6,16 +6,25 @@
    ========================================== */
 
 const SOUND_LIBRARY = {
-    click: "https://sfxmint.com/dl/ready-click-04.mp3",        // Âm thanh bấm nút
-    flip: "https://sfxmint.com/dl/paper-fabric-card-flip-06.mp3",         // Âm thanh lật thẻ
-    correct: "https://sfxmint.com/dl/ui-chime-93.mp3",      // Trả lời đúng
-    wrong: "",        // Trả lời sai
-    win: "",          // Chiến thắng
-    start: "",        // Bắt đầu trò chơi
-    complete: "",     // Hoàn thành cấp độ
-    collect: "",      // Nhận vật phẩm
-    notification: "", // Thông báo
-    gameover: ""      // Kết thúc thất bại
+    // Giao diện chung
+    click: "https://sfxmint.com/dl/ready-click-04.mp3",
+    flip: "https://sfxmint.com/dl/paper-fabric-card-flip-06.mp3",
+    correct: "https://sfxmint.com/dl/ui-chime-93.mp3",
+
+    // Chiến đấu Space Battle
+    shoot: "https://sfxmint.com/dl/magic-scifi-laser-62.mp3",
+    hit: "https://sfxmint.com/dl/bullet-impact-08.mp3",
+    explosion: "https://sfxmint.com/dl/retro-game-explosion-55.mp3",
+    bossExplosion: "https://sfxmint.com/dl/impact-explosion-36.mp3",
+
+    // Hiệu ứng bổ sung
+    wrong: "https://sfxmint.com/dl/feedback-buzzer-19.mp3",
+    win: "https://sfxmint.com/dl/game-show-win-08.mp3",
+    start: "https://sfxmint.com/dl/ui-app-open-38.mp3",
+    complete: "https://sfxmint.com/dl/feedback-level-up-71.mp3",
+    collect: "https://sfxmint.com/dl/ui-chime-114.mp3",
+    notification: "https://sfxmint.com/dl/ui-chime-82.mp3",
+    gameover: "https://sfxmint.com/dl/retro-game-game-over-66.mp3"
 };
 
 const SoundManager = (() => {
