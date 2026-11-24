@@ -1,26 +1,573 @@
-*{box-sizing:border-box}
-:root{color-scheme:dark;font-family:Arial,Helvetica,sans-serif}
-body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#102d50,#050b17 70%);color:#eef7ff;display:flex;justify-content:center;align-items:center;padding:12px}
-button{font:inherit;cursor:pointer;border:0}
-#gameShell{width:min(100%,900px);background:#08182b;border:1px solid #254766;border-radius:18px;overflow:hidden;box-shadow:0 20px 70px #0009}
-.topbar{height:68px;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;background:#0c2038;border-bottom:1px solid #254766}
-.brand{display:flex;gap:10px;align-items:center}.brand-icon{font-size:30px}.brand b{display:block;letter-spacing:2px}.brand small{font-size:9px;color:#83a9ca;letter-spacing:1.5px}
-.stats{display:flex;gap:18px}.stat{text-align:center;min-width:42px}.stat small{display:block;font-size:9px;color:#8ba9c5}.stat b{font-size:18px;color:#71e4ff}
-.game-area{position:relative;background:#061426}
-.battle-info{height:38px;padding:7px 14px;display:flex;align-items:center;justify-content:space-between;background:#0a1b30}
-.health-wrap{display:flex;align-items:center;gap:7px;width:55%;font-size:12px}.bar{height:10px;background:#263d55;border-radius:20px;overflow:hidden;flex:1}.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#20d58a,#8df5a8);transition:width .15s}.health-wrap b{font-size:11px;min-width:35px}.wave-info{font-size:11px;font-weight:bold;color:#8eeaff;letter-spacing:1px}
-.boss-wrap{padding:6px 14px 8px;background:#251126}.boss-title{display:flex;justify-content:space-between;color:#ff9eae;font-size:10px;font-weight:bold;margin-bottom:4px}.boss-bar i{background:linear-gradient(90deg,#e52e5c,#ff8c69)}
-#gameCanvas{display:block;width:100%;height:min(68vh,600px);min-height:390px;background:linear-gradient(#071a31,#081126);touch-action:none}
-.notice{position:absolute;top:24%;left:50%;transform:translateX(-50%);padding:12px 20px;border:1px solid #5ee7ff;border-radius:12px;background:#071a31eF;color:#b9f5ff;font-weight:bold;text-align:center;z-index:3;white-space:pre-line;box-shadow:0 0 25px #00cfff55}
-.hidden{display:none!important}
-.overlay{position:absolute;inset:0;z-index:5;background:#020916dc;display:flex;align-items:center;justify-content:center;padding:16px}
-.dialog{width:min(100%,470px);padding:26px 22px;text-align:center;background:linear-gradient(145deg,#102b49,#09182b);border:1px solid #3b668c;border-radius:18px;box-shadow:0 18px 50px #000b}
-.dialog h1{font-size:clamp(21px,4vw,32px);margin:8px 0;color:#9ceeff}.dialog h2{margin:4px 0 12px;color:#a9eeff}.dialog p{color:#bdd0e3;line-height:1.5}.big-icon{font-size:54px}
-.primary-btn,.secondary-btn{border-radius:10px;padding:13px 18px;font-weight:bold;letter-spacing:.4px;margin-top:10px}
-.primary-btn{background:linear-gradient(90deg,#00a9d6,#3869f3);color:white;box-shadow:0 5px 18px #007bb955}.secondary-btn{background:#203d5b;color:#d7ecff;border:1px solid #456783}
-.shop-dialog{width:min(100%,560px)}.shop-xp{font-size:15px}.shop-xp b{color:#ffe477}.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}.shop-card{padding:15px 10px;border:1px solid #315777;background:#0b2037;border-radius:13px}.shop-card h3{margin:6px 0}.shop-card p{font-size:12px;min-height:36px}.shop-card b{color:#ffe477}.shop-icon{font-size:34px}
-.button-row{display:flex;gap:10px;justify-content:center}.button-row button{flex:1}
-.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0}.result-stats div{background:#0a2038;padding:10px 4px;border-radius:9px}.result-stats small{display:block;color:#8faec9;font-size:10px}.result-stats b{display:block;color:#ffe477;font-size:20px;margin-top:5px}
-.controls{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px;background:#0b1d32;border-top:1px solid #254766}.control-btn,.fire-btn,.shop-open-btn{min-width:58px;height:48px;border-radius:12px;background:#173a5c;color:#e5f8ff;font-size:22px;border:1px solid #477394;touch-action:none;user-select:none}.fire-btn{min-width:112px;background:linear-gradient(90deg,#a53b22,#ec7130);font-size:15px;font-weight:bold}.shop-open-btn{font-size:12px;padding:0 12px;background:#304c73}
-.keyboard-hint{text-align:center;padding:0 8px 10px;color:#7998b6;font-size:10px}
-@media(max-width:560px){body{padding:0}#gameShell{border-radius:0;min-height:100vh}.topbar{padding:8px 10px}.stats{gap:9px}.stat{min-width:34px}.brand b{font-size:12px}.brand small{font-size:8px}#gameCanvas{height:58vh;min-height:360px}.controls{gap:8px;padding:10px 6px}.control-btn{min-width:48px}.fire-btn{min-width:88px}.shop-open-btn{padding:0 8px;font-size:10px}.dialog{padding:20px 14px}.shop-grid{gap:7px}.shop-card{padding:12px 6px}.shop-card h3{font-size:14px}}
+
+/* ==========================================
+   G002 SPACE BATTLE
+   RESPONSIVE LAYOUT - FIX HEADER CUT
+   ========================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    color-scheme: dark;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    background: radial-gradient(ellipse at top, #102d50, #050b17 70%);
+    color: #eef7ff;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+    border: 0;
+}
+
+/* KHUNG GAME */
+#gameShell {
+    width: min(100%, 900px);
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: #08182b;
+    border: 1px solid #254766;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: 0 20px 70px #0009;
+}
+
+/* TIÊU ĐỀ */
+.topbar {
+    flex: 0 0 68px;
+    min-height: 68px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0c2038;
+    border-bottom: 1px solid #254766;
+}
+
+.brand {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.brand-icon {
+    font-size: 30px;
+}
+
+.brand b {
+    display: block;
+    letter-spacing: 2px;
+}
+
+.brand small {
+    font-size: 9px;
+    color: #83a9ca;
+    letter-spacing: 1.5px;
+}
+
+.stats {
+    display: flex;
+    gap: 18px;
+}
+
+.stat {
+    text-align: center;
+    min-width: 42px;
+}
+
+.stat small {
+    display: block;
+    font-size: 9px;
+    color: #8ba9c5;
+}
+
+.stat b {
+    font-size: 18px;
+    color: #71e4ff;
+}
+
+/* KHU VỰC CHIẾN ĐẤU */
+.game-area {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: #061426;
+    overflow: hidden;
+}
+
+/* THANH MÁU VÀ ĐỢT */
+.battle-info {
+    flex: 0 0 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 7px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0a1b30;
+}
+
+.health-wrap {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 55%;
+    font-size: 12px;
+}
+
+.bar {
+    height: 10px;
+    background: #263d55;
+    border-radius: 20px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.bar i {
+    display: block;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #20d58a, #8df5a8);
+    transition: width .15s;
+}
+
+.health-wrap b {
+    font-size: 11px;
+    min-width: 35px;
+}
+
+.wave-info {
+    font-size: 11px;
+    font-weight: bold;
+    color: #8eeaff;
+    letter-spacing: 1px;
+}
+
+/* BOSS */
+.boss-wrap {
+    flex: 0 0 auto;
+    padding: 6px 14px 8px;
+    background: #251126;
+}
+
+.boss-title {
+    display: flex;
+    justify-content: space-between;
+    color: #ff9eae;
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.boss-bar i {
+    background: linear-gradient(90deg, #e52e5c, #ff8c69);
+}
+
+/* CANVAS: TỰ ĐỘNG CHIẾM PHẦN CHIỀU CAO CÒN LẠI */
+#gameCanvas {
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    height: 0;
+    min-height: 0;
+    background: linear-gradient(#071a31, #081126);
+    touch-action: none;
+}
+
+/* THÔNG BÁO */
+.notice {
+    position: absolute;
+    top: 24%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    border: 1px solid #5ee7ff;
+    border-radius: 12px;
+    background: #071a31ef;
+    color: #b9f5ff;
+    font-weight: bold;
+    text-align: center;
+    z-index: 3;
+    white-space: pre-line;
+    box-shadow: 0 0 25px #00cfff55;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* CÁC MÀN HÌNH PHỦ */
+.overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background: #020916dc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.dialog {
+    width: min(100%, 470px);
+    padding: 26px 22px;
+    text-align: center;
+    background: linear-gradient(145deg, #102b49, #09182b);
+    border: 1px solid #3b668c;
+    border-radius: 18px;
+    box-shadow: 0 18px 50px #000b;
+}
+
+.dialog h1 {
+    font-size: clamp(21px, 4vw, 32px);
+    margin: 8px 0;
+    color: #9ceeff;
+}
+
+.dialog h2 {
+    margin: 4px 0 12px;
+    color: #a9eeff;
+}
+
+.dialog p {
+    color: #bdd0e3;
+    line-height: 1.5;
+}
+
+.big-icon {
+    font-size: 54px;
+}
+
+/* NÚT */
+.primary-btn,
+.secondary-btn {
+    border-radius: 10px;
+    padding: 13px 18px;
+    font-weight: bold;
+    letter-spacing: .4px;
+    margin-top: 10px;
+}
+
+.primary-btn {
+    background: linear-gradient(90deg, #00a9d6, #3869f3);
+    color: white;
+    box-shadow: 0 5px 18px #007bb955;
+}
+
+.secondary-btn {
+    background: #203d5b;
+    color: #d7ecff;
+    border: 1px solid #456783;
+}
+
+/* CỬA HÀNG */
+.shop-dialog {
+    width: min(100%, 560px);
+}
+
+.shop-xp {
+    font-size: 15px;
+}
+
+.shop-xp b {
+    color: #ffe477;
+}
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 18px 0;
+}
+
+.shop-card {
+    padding: 15px 10px;
+    border: 1px solid #315777;
+    background: #0b2037;
+    border-radius: 13px;
+}
+
+.shop-card h3 {
+    margin: 6px 0;
+}
+
+.shop-card p {
+    font-size: 12px;
+    min-height: 36px;
+}
+
+.shop-card b {
+    color: #ffe477;
+}
+
+.shop-icon {
+    font-size: 34px;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.button-row button {
+    flex: 1;
+}
+
+/* KẾT QUẢ */
+.result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.result-stats div {
+    background: #0a2038;
+    padding: 10px 4px;
+    border-radius: 9px;
+}
+
+.result-stats small {
+    display: block;
+    color: #8faec9;
+    font-size: 10px;
+}
+
+.result-stats b {
+    display: block;
+    color: #ffe477;
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+/* THANH ĐIỀU KHIỂN */
+.controls {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 10px;
+    background: #0b1d32;
+    border-top: 1px solid #254766;
+}
+
+.control-btn,
+.fire-btn,
+.shop-open-btn {
+    min-width: 58px;
+    height: 48px;
+    border-radius: 12px;
+    background: #173a5c;
+    color: #e5f8ff;
+    font-size: 22px;
+    border: 1px solid #477394;
+    touch-action: none;
+    user-select: none;
+}
+
+.fire-btn {
+    min-width: 112px;
+    background: linear-gradient(90deg, #a53b22, #ec7130);
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.shop-open-btn {
+    font-size: 12px;
+    padding: 0 12px;
+    background: #304c73;
+}
+
+/* GỢI Ý PHÍM */
+.keyboard-hint {
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 0 8px 8px;
+    color: #7998b6;
+    font-size: 10px;
+    min-height: 22px;
+}
+
+/* ĐIỆN THOẠI */
+@media (max-width: 560px) {
+    #gameShell {
+        width: 100%;
+        border: 0;
+    }
+
+    .topbar {
+        flex-basis: 60px;
+        min-height: 60px;
+        padding: 7px 10px;
+    }
+
+    .stats {
+        gap: 9px;
+    }
+
+    .stat {
+        min-width: 34px;
+    }
+
+    .brand b {
+        font-size: 12px;
+    }
+
+    .brand small {
+        font-size: 8px;
+    }
+
+    .battle-info {
+        flex-basis: 36px;
+        min-height: 36px;
+        height: 36px;
+        padding: 6px 10px;
+    }
+
+    .controls {
+        gap: 8px;
+        padding: 8px 6px;
+    }
+
+    .control-btn {
+        min-width: 48px;
+        height: 44px;
+    }
+
+    .fire-btn {
+        min-width: 88px;
+        height: 44px;
+    }
+
+    .shop-open-btn {
+        height: 44px;
+        padding: 0 8px;
+        font-size: 10px;
+    }
+
+    .dialog {
+        padding: 20px 14px;
+    }
+
+    .shop-grid {
+        gap: 7px;
+    }
+
+    .shop-card {
+        padding: 12px 6px;
+    }
+
+    .shop-card h3 {
+        font-size: 14px;
+    }
+}
+
+/* MÀN HÌNH THẤP */
+@media (max-height: 650px) {
+    .topbar {
+        flex-basis: 54px;
+        min-height: 54px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .battle-info {
+        flex-basis: 32px;
+        min-height: 32px;
+        height: 32px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+
+    .controls {
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    .control-btn,
+    .fire-btn,
+    .shop-open-btn {
+        height: 40px;
+    }
+
+    .keyboard-hint {
+        min-height: 17px;
+        padding-bottom: 4px;
+    }
+}
+
+/* MÀN HÌNH RẤT THẤP */
+@media (max-height: 480px) {
+    .topbar {
+        flex-basis: 46px;
+        min-height: 46px;
+    }
+
+    .brand-icon {
+        font-size: 23px;
+    }
+
+    .brand small {
+        display: none;
+    }
+
+    .stat small {
+        font-size: 8px;
+    }
+
+    .stat b {
+        font-size: 15px;
+    }
+
+    .battle-info {
+        flex-basis: 28px;
+        min-height: 28px;
+        height: 28px;
+    }
+
+    .controls {
+        gap: 6px;
+        padding: 4px;
+    }
+
+    .control-btn,
+    .fire-btn,
+    .shop-open-btn {
+        height: 34px;
+        min-width: 42px;
+    }
+
+    .fire-btn {
+        min-width: 76px;
+    }
+
+    .keyboard-hint {
+        font-size: 8px;
+        min-height: 14px;
+        padding-bottom: 2px;
+    }
+}
