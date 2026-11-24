@@ -1,99 +1,190 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
   <meta name="theme-color" content="#071426">
   <title>G002 - Chiến đấu không gian</title>
-  <link rel="stylesheet" href="https://phanviethoang.github.io/Kho-game-html5/00_SHARED_ASSETS/pyquest-hud.css">
+
+  <link rel="stylesheet"
+        href="https://phanviethoang.github.io/Kho-game-html5/00_SHARED_ASSETS/pyquest-hud.css">
+
   <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
   <main id="gameShell">
+
+    <!-- TIÊU ĐỀ -->
     <header class="topbar">
-      <div class="brand"><span class="brand-icon">🚀</span><div><b>SPACE BATTLE</b><small>CHIẾN ĐẤU KHÔNG GIAN</small></div></div>
+      <div class="brand">
+        <span class="brand-icon">🚀</span>
+        <div>
+          <b>SPACE BATTLE</b>
+          <small>CHIẾN ĐẤU KHÔNG GIAN</small>
+        </div>
+      </div>
+
       <div class="stats">
-        <div class="stat"><small>CẤP ĐỘ</small><b id="levelText">1</b></div>
-        <div class="stat"><small>XP</small><b id="xpText">10</b></div>
-        <div class="stat"><small>ĐIỂM</small><b id="scoreText">0</b></div>
+        <div class="stat">
+          <small>CẤP ĐỘ</small>
+          <b id="levelText">1</b>
+        </div>
+
+        <div class="stat">
+          <small>XP</small>
+          <b id="xpText">10</b>
+        </div>
+
+        <div class="stat">
+          <small>ĐIỂM</small>
+          <b id="scoreText">0</b>
+        </div>
       </div>
     </header>
 
+    <!-- KHU VỰC CHIẾN ĐẤU -->
     <section class="game-area">
+
       <div class="battle-info">
-        <div class="health-wrap"><span>❤️</span><div class="bar"><i id="healthBar"></i></div><b id="healthText">100%</b></div>
-        <div class="wave-info" id="waveText">ĐỢT 1 / 2</div>
+        <div class="health-wrap">
+          <span>❤️</span>
+          <div class="bar">
+            <i id="healthBar"></i>
+          </div>
+          <b id="healthText">100%</b>
+        </div>
+
+        <div class="wave-info" id="waveText">
+          ĐỢT 1 / 2
+        </div>
       </div>
+
       <div class="boss-wrap hidden" id="bossWrap">
-        <div class="boss-title"><span id="bossName">BOSS</span><span id="bossHealthText">100%</span></div>
-        <div class="bar boss-bar"><i id="bossHealthBar"></i></div>
+        <div class="boss-title">
+          <span id="bossName">BOSS</span>
+          <span id="bossHealthText">100%</span>
+        </div>
+        <div class="bar boss-bar">
+          <i id="bossHealthBar"></i>
+        </div>
       </div>
+
       <canvas id="gameCanvas" aria-label="Khu vực chiến đấu"></canvas>
+
       <div id="notice" class="notice hidden"></div>
 
+      <!-- MÀN HÌNH BẮT ĐẦU -->
       <section id="startOverlay" class="overlay">
         <div class="dialog">
           <div class="big-icon">🛸</div>
           <h1>CHIẾN ĐẤU KHÔNG GIAN</h1>
           <p>Di chuyển sang trái, phải và bắn hạ kẻ địch đang tiến xuống.</p>
-          <button id="startBtn" class="primary-btn">BẮT ĐẦU CHIẾN ĐẤU</button>
+          <button id="startBtn" class="primary-btn">
+            BẮT ĐẦU CHIẾN ĐẤU
+          </button>
         </div>
       </section>
 
+      <!-- CỬA HÀNG -->
       <section id="shopOverlay" class="overlay hidden">
         <div class="dialog shop-dialog">
           <h2>🛒 CỬA HÀNG NÂNG CẤP</h2>
           <p class="shop-xp">XP hiện có: <b id="shopXp">10</b></p>
+
           <div class="shop-grid">
             <article class="shop-card">
-              <div class="shop-icon">🔫</div><h3>Nâng cấp đạn</h3>
+              <div class="shop-icon">🔫</div>
+              <h3>Nâng cấp đạn</h3>
               <p id="weaponDescription">Tăng sức mạnh hỏa lực.</p>
               <b id="weaponCost">Miễn phí</b>
               <button id="upgradeBtn" class="primary-btn">NÂNG CẤP</button>
             </article>
+
             <article class="shop-card">
-              <div class="shop-icon">❤️</div><h3>Hồi phục</h3>
-              <p>Hồi thêm 30% máu tối đa.</p><b>10 XP</b>
+              <div class="shop-icon">❤️</div>
+              <h3>Hồi phục</h3>
+              <p>Hồi thêm 30% máu tối đa.</p>
+              <b>10 XP</b>
               <button id="healBtn" class="primary-btn">HỒI MÁU</button>
             </article>
           </div>
-          <button id="closeShopBtn" class="secondary-btn">TIẾP TỤC CHIẾN ĐẤU</button>
+
+          <button id="closeShopBtn" class="secondary-btn">
+            TIẾP TỤC CHIẾN ĐẤU
+          </button>
         </div>
       </section>
 
+      <!-- XÁC NHẬN -->
       <section id="confirmOverlay" class="overlay hidden">
         <div class="dialog confirm-dialog">
-          <h2 id="confirmTitle">XÁC NHẬN</h2><p id="confirmText"></p>
-          <div class="button-row"><button id="confirmYes" class="primary-btn">ĐỒNG Ý</button><button id="confirmNo" class="secondary-btn">HỦY</button></div>
+          <h2 id="confirmTitle">XÁC NHẬN</h2>
+          <p id="confirmText"></p>
+
+          <div class="button-row">
+            <button id="confirmYes" class="primary-btn">ĐỒNG Ý</button>
+            <button id="confirmNo" class="secondary-btn">HỦY</button>
+          </div>
         </div>
       </section>
 
+      <!-- KẾT QUẢ -->
       <section id="resultOverlay" class="overlay hidden">
         <div class="dialog result-dialog">
           <div id="resultIcon" class="big-icon">🏆</div>
           <h1 id="resultTitle">CHIẾN THẮNG!</h1>
           <p id="resultMessage"></p>
+
           <div class="result-stats">
-            <div><small>XP ban đầu</small><b id="initialXpResult">10</b></div>
-            <div><small>XP đã dùng</small><b id="spentXpResult">0</b></div>
-            <div><small>XP còn lại</small><b id="finalXpResult">10</b></div>
+            <div>
+              <small>XP ban đầu</small>
+              <b id="initialXpResult">10</b>
+            </div>
+
+            <div>
+              <small>XP đã dùng</small>
+              <b id="spentXpResult">0</b>
+            </div>
+
+            <div>
+              <small>XP còn lại</small>
+              <b id="finalXpResult">10</b>
+            </div>
           </div>
-          <button id="exitBtn" class="primary-btn">KẾT THÚC TRÒ CHƠI</button>
+
+          <button id="exitBtn" class="primary-btn">
+            KẾT THÚC TRÒ CHƠI
+          </button>
         </div>
       </section>
+
     </section>
 
+    <!-- ĐIỀU KHIỂN -->
     <footer class="controls">
       <button id="leftBtn" class="control-btn" aria-label="Sang trái">◀</button>
       <button id="fireBtn" class="fire-btn">🔥 BẮN</button>
       <button id="rightBtn" class="control-btn" aria-label="Sang phải">▶</button>
       <button id="shopBtn" class="shop-open-btn">🛒 CỬA HÀNG</button>
     </footer>
-    <div class="keyboard-hint">Điều khiển: ← → hoặc A / D · Phím SPACE để bắn · B để mở cửa hàng</div>
+
+    <div class="keyboard-hint">
+      Điều khiển: ← → hoặc A / D · Phím SPACE để bắn · B để mở cửa hàng
+    </div>
+
   </main>
 
+  <!-- THƯ VIỆN DÙNG CHUNG -->
   <script src="https://phanviethoang.github.io/Kho-game-html5/00_SHARED_ASSETS/SoundManager.js"></script>
   <script src="https://phanviethoang.github.io/Kho-game-html5/00_SHARED_ASSETS/pyquest-bridge.js"></script>
+
+  <!-- GAME -->
   <script src="./game.js"></script>
+
 </body>
 </html>
